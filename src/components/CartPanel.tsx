@@ -26,7 +26,7 @@ export default function CartPanel({
   /** Qué hacer al pulsar "Seguir comprando" con el carrito vacío. */
   onSeguirComprando?: () => void;
 }) {
-  const { items, totalPrice, setQuantity, removeItem, clear, ready } =
+  const { items, totalPrice, setQuantity, removeItem, clear, ready, closePanel } =
     useCart();
   const router = useRouter();
 
@@ -76,6 +76,9 @@ export default function CartPanel({
 
     const orderId = data[0].order_id;
     clear();
+    // El panel lateral se queda montado al navegar: sin esto taparía la
+    // confirmación del pedido en pantallas grandes.
+    closePanel();
     router.push(`/pedido/${orderId}`);
   }
 
