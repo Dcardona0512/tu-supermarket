@@ -13,6 +13,22 @@ function today(): string {
   ).padStart(2, "0")}`;
 }
 
+/**
+ * "2026-07-31" -> "viernes, 31 de julio de 2026".
+ *
+ * Se parte a mano en vez de `new Date(texto)` porque esa forma interpreta la
+ * fecha en UTC y en Colombia mostraría el día anterior.
+ */
+function longDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1).toLocaleDateString("es-CO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export default function CashClosingView({
   initial,
 }: {
@@ -58,19 +74,35 @@ export default function CashClosingView({
             Ventas entregadas del día y efectivo que debería haber en caja.
           </p>
         </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-neutral-600">
-            Día
-          </label>
-          <input
-            type="date"
-            value={date}
-            max={today()}
-            onChange={(e) => changeDate(e.target.value)}
-            className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-          />
+        <div className="flex items-end gap-2">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-neutral-600">
+              Día
+            </label>
+            <input
+              type="date"
+              value={date}
+              max={today()}
+              onChange={(e) => changeDate(e.target.value)}
+              className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            disabled={pending || !data}
+            title="Abre el diálogo de impresión; ahí eliges «Guardar como PDF»"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:bg-neutral-300"
+          >
+            <PdfIcon />
+            Descargar PDF
+          </button>
         </div>
       </div>
+
+      <p className="-mt-2 mb-4 text-xs text-neutral-400">
+        Incluye todo lo entregado ese día, de 00:00 a 23:59 (hora de Colombia).
+      </p>
 
       {error && (
         <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -192,7 +224,198 @@ export default function CashClosingView({
           )}
         </section>
       </div>
+
+      <PrintableClosing
+        date={date}
+        data={data}
+        counted={countedNum}
+        diff={diff}
+      />
     </div>
+  );
+}
+
+/**
+ * Comprobante del cierre para llevar en papel o guardar como PDF.
+ *
+ * No se ve en pantalla: los estilos de `globals.css` lo muestran solo al
+ * imprimir, y desde el diálogo del navegador se guarda como PDF.
+ */
+function PrintableClosing({
+  date,
+  data,
+  counted,
+  diff,
+}: {
+  date: string;
+  data: CashClosing | null;
+  counted: number | null;
+  diff: number | null;
+}) {
+  const t = data?.totals;
+  const ventas = data?.sales ?? [];
+
+  return (
+    <div className="hoja-impresion">
+      <div style={{ borderBottom: "2px solid #000", paddingBottom: 8 }}>
+        <h1 style={{ fontSize: "16pt", fontWeight: 800, letterSpacing: 1 }}>
+          TU SUPERMARKET
+        </h1>
+        <p style={{ fontSize: "12pt", fontWeight: 700, marginTop: 2 }}>
+          Cierre de caja
+        </p>
+        <p style={{ marginTop: 2 }}>
+          {longDate(date)} · de 00:00 a 23:59
+        </p>
+      </div>
+
+      <table
+        style={{ width: "100%", marginTop: 14, borderCollapse: "collapse" }}
+      >
+        <tbody>
+          <PrintRow label="Ventas del día" value={formatCOP(Number(t?.revenue ?? 0))} />
+          <PrintRow label="Efectivo esperado en caja" value={formatCOP(Number(t?.cash ?? 0))} strong />
+          <PrintRow label="Transferencias" value={formatCOP(Number(t?.transfer ?? 0))} />
+          <PrintRow label="Domicilios cobrados (no cuentan en caja)" value={formatCOP(Number(t?.delivery ?? 0))} />
+          <PrintRow label="Número de ventas" value={String(t?.orders ?? 0)} />
+          <PrintRow
+            label="Ventas en tienda"
+            value={`${formatCOP(Number(data?.by_channel?.tienda?.revenue ?? 0))}  (${data?.by_channel?.tienda?.orders ?? 0})`}
+          />
+          <PrintRow
+            label="Pedidos a domicilio entregados"
+            value={`${formatCOP(Number(data?.by_channel?.linea?.revenue ?? 0))}  (${data?.by_channel?.linea?.orders ?? 0})`}
+          />
+        </tbody>
+      </table>
+
+      {counted != null && (
+        <table
+          style={{ width: "100%", marginTop: 12, borderCollapse: "collapse" }}
+        >
+          <tbody>
+            <PrintRow label="Efectivo contado" value={formatCOP(counted)} />
+            <PrintRow
+              label="Diferencia"
+              strong
+              value={
+                diff === 0
+                  ? "La caja cuadra"
+                  : (diff ?? 0) > 0
+                    ? `Sobran ${formatCOP(diff ?? 0)}`
+                    : `Faltan ${formatCOP(Math.abs(diff ?? 0))}`
+              }
+            />
+          </tbody>
+        </table>
+      )}
+
+      <h2 style={{ fontSize: "11pt", fontWeight: 700, marginTop: 16 }}>
+        Detalle de ventas
+      </h2>
+      {ventas.length === 0 ? (
+        <p style={{ marginTop: 6 }}>No hubo ventas entregadas este día.</p>
+      ) : (
+        <table
+          style={{
+            width: "100%",
+            marginTop: 6,
+            borderCollapse: "collapse",
+            fontSize: "10pt",
+          }}
+        >
+          <thead>
+            <tr style={{ borderBottom: "1px solid #000", textAlign: "left" }}>
+              <th style={{ padding: "3px 0" }}>#</th>
+              <th>Cliente</th>
+              <th>Canal</th>
+              <th>Pago</th>
+              <th style={{ textAlign: "right" }}>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ventas.map((s) => (
+              <tr key={s.order_number} style={{ borderBottom: "1px solid #ddd" }}>
+                <td style={{ padding: "3px 0" }}>{s.order_number}</td>
+                <td>{s.customer_name || "Venta en tienda"}</td>
+                <td>{s.channel === "tienda" ? "Tienda" : "En línea"}</td>
+                <td style={{ textTransform: "capitalize" }}>
+                  {s.payment_method}
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  {formatCOP(Number(s.total))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div
+        style={{
+          marginTop: 34,
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 40,
+        }}
+      >
+        <div style={{ flex: 1, borderTop: "1px solid #000", paddingTop: 4 }}>
+          Entrega
+        </div>
+        <div style={{ flex: 1, borderTop: "1px solid #000", paddingTop: 4 }}>
+          Recibe
+        </div>
+      </div>
+
+      <p style={{ marginTop: 16, fontSize: "8pt", color: "#555" }}>
+        Generado el {new Date().toLocaleString("es-CO")}
+      </p>
+    </div>
+  );
+}
+
+function PrintRow({
+  label,
+  value,
+  strong,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <tr style={{ borderBottom: "1px solid #ddd" }}>
+      <td style={{ padding: "4px 0" }}>{label}</td>
+      <td
+        style={{
+          padding: "4px 0",
+          textAlign: "right",
+          fontWeight: strong ? 700 : 400,
+        }}
+      >
+        {value}
+      </td>
+    </tr>
+  );
+}
+
+function PdfIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3v12" />
+      <path d="m7 12 5 5 5-5" />
+      <path d="M4 19h16" />
+    </svg>
   );
 }
 

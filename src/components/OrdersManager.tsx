@@ -284,39 +284,59 @@ export default function OrdersManager({
                       </div>
                     )}
 
-                    <div className="mt-4 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-medium text-neutral-500">
-                        Cambiar estado:
-                      </span>
-                      {(
-                        ["pendiente", "entregado", "cancelado"] as OrderStatus[]
-                      ).map((st) => (
-                        <button
-                          key={st}
-                          disabled={updating === o.id || o.status === st}
-                          onClick={() =>
-                            // Antes de entregar hay que registrar cómo pagó
-                            st === "entregado"
-                              ? setCobrando(cobrando === o.id ? null : o.id)
-                              : changeStatus(o.id, st)
-                          }
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-40 ${
-                            o.status === st
-                              ? "bg-brand text-white"
-                              : "border border-black/10 text-neutral-700 hover:bg-white"
-                          }`}
-                        >
-                          {st}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Entregado es definitivo: la venta ya entró al cierre de
+                        caja de ese día y devolverla movería informes cerrados. */}
+                    {o.status === "entregado" ? (
+                      <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2">
+                        <LockIcon />
+                        <p className="text-xs font-medium text-green-800">
+                          Entregado. El estado de este pedido ya no se puede
+                          cambiar.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-medium text-neutral-500">
+                          Cambiar estado:
+                        </span>
+                        {(
+                          [
+                            "pendiente",
+                            "entregado",
+                            "cancelado",
+                          ] as OrderStatus[]
+                        ).map((st) => (
+                          <button
+                            key={st}
+                            disabled={updating === o.id || o.status === st}
+                            onClick={() =>
+                              // Antes de entregar hay que registrar cómo pagó
+                              st === "entregado"
+                                ? setCobrando(cobrando === o.id ? null : o.id)
+                                : changeStatus(o.id, st)
+                            }
+                            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-40 ${
+                              o.status === st
+                                ? "bg-brand text-white"
+                                : "border border-black/10 text-neutral-700 hover:bg-white"
+                            }`}
+                          >
+                            {st}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Quien entrega confirma el pago real, no el que dijo el cliente */}
                     {cobrando === o.id && (
                       <div className="mt-3 rounded-xl border border-brand/30 bg-white p-3">
-                        <p className="mb-2 text-xs font-semibold text-neutral-700">
+                        <p className="mb-1 text-xs font-semibold text-neutral-700">
                           ¿Cómo pagó el cliente los{" "}
                           {formatCOP(Number(o.total))}?
+                        </p>
+                        <p className="mb-2 text-xs text-amber-700">
+                          Al marcarlo entregado el estado queda fijo y ya no se
+                          podrá cambiar.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {(
@@ -356,5 +376,25 @@ export default function OrdersManager({
         </div>
       )}
     </div>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="shrink-0 text-green-700"
+      aria-hidden="true"
+    >
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+    </svg>
   );
 }

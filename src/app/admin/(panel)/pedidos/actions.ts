@@ -25,6 +25,22 @@ export async function updateOrderStatus(
 
   if (!VALID.includes(status)) return { ok: false, error: "Estado inválido" };
 
+  // Un pedido entregado ya se cobró y entró al cierre de caja de ese día:
+  // su estado queda fijo. La base lo impide con un trigger; aquí se avisa
+  // con un mensaje claro en vez de dejar salir el error de Postgres.
+  const { data: actual } = await supabase
+    .from("orders")
+    .select("status")
+    .eq("id", orderId)
+    .single();
+
+  if (actual?.status === "entregado" && status !== "entregado") {
+    return {
+      ok: false,
+      error: "El pedido ya fue entregado: su estado no se puede cambiar.",
+    };
+  }
+
   const cambios: { status: OrderStatus; payment_method?: PaymentMethod } = {
     status,
   };
