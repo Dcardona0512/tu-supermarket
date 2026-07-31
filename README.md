@@ -51,6 +51,13 @@ El login usa un nombre de usuario, no un correo: internamente se convierte a
 `<usuario>@mimarket.com` (ver `src/lib/admin-user.ts`). El usuario se crea desde
 el panel de Supabase, en **Authentication → Add user**, con ese formato de correo.
 
+## Datos de demostración
+
+`supabase/seed-demo.sql` carga 6 categorías, 15 subcategorías y 24 productos de
+ejemplo con precios en COP, apuntando a las ilustraciones de `public/demo/`.
+Sirve para mostrar el sistema antes de que la tienda cargue su inventario real.
+Para dejar el catálogo en blanco: `delete from products; delete from categories;`.
+
 ## Modelo de datos (Supabase)
 
 - `categories`, `products`, `orders`, `order_items`, `stock_entries` (todas con RLS).
