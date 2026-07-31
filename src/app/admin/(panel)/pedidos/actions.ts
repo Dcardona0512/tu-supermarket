@@ -1,0 +1,53 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import type { OrderStatus, PaymentMethod } from "@/lib/database.types";
+
+const VALID: OrderStatus[] = ["pendiente", "entregado", "cancelado"];
+const PAGOS: PaymentMethod[] = ["efectivo", "transferencia"];
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: OrderStatus,
+  /**
+   * Cómo pagó el cliente. Solo se registra al entregar: en los pedidos en
+   * línea muchos dicen que van a transferir y terminan pagando en efectivo,
+   * así que lo confirma quien hace la entrega.
+   */
+  paymentMethod?: PaymentMethod
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "No autorizado" };
+
+  if (!VALID.includes(status)) return { ok: false, error: "Estado inválido" };
+
+  const cambios: { status: OrderStatus; payment_method?: PaymentMethod } = {
+    status,
+  };
+
+  if (status === "entregado") {
+    if (!paymentMethod || !PAGOS.includes(paymentMethod)) {
+      return { ok: false, error: "Indica si pagó en efectivo o por transferencia" };
+    }
+    cambios.payment_method = paymentMethod;
+  }
+
+  const { error } = await supabase
+    .from("orders")
+    .update(cambios)
+    .eq("id", orderId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/pedidos");
+  revalidatePath("/admin");
+  revalidatePath("/admin/informes");
+  // Cancelar o reactivar un pedido ajusta el inventario (trigger en Postgres)
+  revalidatePath("/admin/productos");
+  revalidatePath("/");
+  return { ok: true };
+}
