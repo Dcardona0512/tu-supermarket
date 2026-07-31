@@ -3,8 +3,8 @@
 :root {
   --background: #f7f8fa;
   --foreground: #14181f;
-  --brand: #16a34a;
-  --brand-dark: #15803d;
+  --brand: #1d4ed8;
+  --brand-dark: #1e3a8a;
   /* Alto de la barra superior de la tienda (contenido + borde inferior).
      El panel del carrito arranca justo debajo para no tapar el botón. */
   --header-h: 3.8125rem;

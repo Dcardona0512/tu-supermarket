@@ -65,11 +65,11 @@ export default function AdminSidebar({
         {/* Logo y botón de menú, ambos dentro del ancho de la franja */}
         <div className="flex h-14 shrink-0 items-center gap-1 border-b border-black/5 px-1.5">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-black text-white">
-            MM
+            TS
           </span>
           {open && (
             <span className="ml-1 min-w-0 flex-1 truncate text-sm font-bold">
-              Panel · Mi Market
+              Panel · TU SUPERMARKET
             </span>
           )}
           <button

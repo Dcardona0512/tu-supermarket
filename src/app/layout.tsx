@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mi Market",
+  title: "TU SUPERMARKET",
   description:
-    "Haz tu pedido en línea en Mi Market y paga en efectivo o por transferencia al recibir.",
+    "Haz tu pedido en línea en TU SUPERMARKET y paga en efectivo o por transferencia al recibir.",
 };
 
 export default function RootLayout({

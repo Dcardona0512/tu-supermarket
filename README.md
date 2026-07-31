@@ -1,10 +1,10 @@
-# Mi Market
+# TU SUPERMARKET
 
 Aplicación web de inventario y pedidos para tiendas de barrio.
 Los clientes navegan el catálogo y hacen pedidos con **pago contra entrega** (sin pasarela de pagos), y el administrador gestiona todo desde un dashboard.
 
-🔗 **Demo en producción:** https://mimarket.vercel.app
-🔐 **Panel de administración:** https://mimarket.vercel.app/admin/login
+🔗 **Demo en producción:** https://mimarket-one.vercel.app
+🔐 **Panel de administración:** https://mimarket-one.vercel.app/admin/login
 
 ## Funcionalidades
 
@@ -48,7 +48,7 @@ Abre http://localhost:3000
 ## Usuario del panel
 
 El login usa un nombre de usuario, no un correo: internamente se convierte a
-`<usuario>@mimarket.com` (ver `src/lib/admin-user.ts`). El usuario se crea desde
+`<usuario>@tusupermarket.com` (ver `src/lib/admin-user.ts`). El usuario se crea desde
 el panel de Supabase, en **Authentication → Add user**, con ese formato de correo.
 
 ## Datos de demostración

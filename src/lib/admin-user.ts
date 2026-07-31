@@ -3,9 +3,9 @@
  * correo. El usuario se convierte aquí en un correo interno; nunca se envía
  * nada a esa dirección.
  */
-const INTERNAL_DOMAIN = "mimarket.com";
+const INTERNAL_DOMAIN = "tusupermarket.com";
 
-/** "miusuario" -> "miusuario@mimarket.com" */
+/** "miusuario" -> "miusuario@tusupermarket.com" */
 export function toLoginEmail(user: string): string {
   const value = user.trim().toLowerCase();
   if (!value) return "";
