@@ -7,9 +7,15 @@ import {
   expiryCutoff,
   expiryStatus,
 } from "@/lib/expiry";
+import ResetDemoButton from "@/components/ResetDemoButton";
 import type { SalesReport } from "@/lib/database.types";
 
 export const dynamic = "force-dynamic";
+
+/** La instalación de demostración es la que publica sus credenciales. */
+const HAY_DEMO = Boolean(
+  process.env.NEXT_PUBLIC_DEMO_USER && process.env.NEXT_PUBLIC_DEMO_PASSWORD
+);
 
 /** Inicio del mes actual, para los indicadores del resumen. */
 function startOfMonth() {
@@ -191,6 +197,10 @@ export default async function DashboardPage() {
           </section>
         </div>
       </div>
+
+      {/* Solo aparece en la instalación de demostración, donde el panel está
+          abierto a cualquiera y conviene poder dejarlo como estaba. */}
+      {HAY_DEMO && <ResetDemoButton />}
     </div>
   );
 }

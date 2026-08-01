@@ -261,6 +261,10 @@ export type Database = {
         Args: { p_date?: string }
         Returns: Json
       }
+      reset_demo: {
+        Args: Record<string, never>
+        Returns: Json
+      }
       create_order: {
         Args: {
           p_customer_address: string
