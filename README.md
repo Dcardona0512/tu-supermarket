@@ -3,9 +3,6 @@
 Aplicación web de inventario y pedidos para tiendas de barrio.
 Los clientes navegan el catálogo y hacen pedidos con **pago contra entrega** (sin pasarela de pagos), y el administrador gestiona todo desde un dashboard.
 
-🔗 **Demo en producción:** https://mimarket-one.vercel.app
-🔐 **Panel de administración:** https://mimarket-one.vercel.app/admin/login
-
 ## Funcionalidades
 
 ### Tienda (clientes, sin registro)
