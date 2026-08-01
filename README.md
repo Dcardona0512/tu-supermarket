@@ -1,6 +1,6 @@
 # TU SUPERMARKET
 
-Aplicación web de inventario y pedidos para tiendas de barrio.
+Aplicación web de inventario y pedidos para tiendas tradicionales y supermercados.
 Los clientes navegan el catálogo y hacen pedidos con **pago contra entrega** (sin pasarela de pagos), y el administrador gestiona todo desde un dashboard.
 
 ## Funcionalidades
