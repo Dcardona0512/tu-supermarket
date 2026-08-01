@@ -28,6 +28,9 @@ const STATUS_STYLES: Record<string, string> = {
   cancelado: "bg-neutral-100 text-neutral-500",
 };
 
+/** Estados de los que un pedido ya no sale (lo garantiza un trigger en la base). */
+const FINALES: OrderStatus[] = ["entregado", "cancelado"];
+
 const CHANNELS: { value: "todos" | "linea" | "tienda"; label: string }[] = [
   { value: "todos", label: "Todos los orígenes" },
   { value: "linea", label: "Pedidos en línea" },
@@ -284,17 +287,12 @@ export default function OrdersManager({
                       </div>
                     )}
 
-                    {/* Entregado es definitivo: la venta ya entró al cierre de
-                        caja de ese día y devolverla movería informes cerrados. */}
-                    {o.status === "entregado" ? (
-                      <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2">
-                        <LockIcon />
-                        <p className="text-xs font-medium text-green-800">
-                          Entregado. El estado de este pedido ya no se puede
-                          cambiar.
-                        </p>
-                      </div>
-                    ) : (
+                    {/* Entregado y cancelado son finales: el primero ya se cobró
+                        y entró al cierre de caja, el segundo ya devolvió las
+                        unidades al inventario. Sin botones no hay nada que
+                        explicar: la etiqueta del pedido ya dice en qué estado
+                        está. */}
+                    {!FINALES.includes(o.status as OrderStatus) && (
                       <div className="mt-4 flex flex-wrap items-center gap-2">
                         <span className="text-xs font-medium text-neutral-500">
                           Cambiar estado:
@@ -330,13 +328,9 @@ export default function OrdersManager({
                     {/* Quien entrega confirma el pago real, no el que dijo el cliente */}
                     {cobrando === o.id && (
                       <div className="mt-3 rounded-xl border border-brand/30 bg-white p-3">
-                        <p className="mb-1 text-xs font-semibold text-neutral-700">
+                        <p className="mb-2 text-xs font-semibold text-neutral-700">
                           ¿Cómo pagó el cliente los{" "}
                           {formatCOP(Number(o.total))}?
-                        </p>
-                        <p className="mb-2 text-xs text-amber-700">
-                          Al marcarlo entregado el estado queda fijo y ya no se
-                          podrá cambiar.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {(
@@ -379,22 +373,3 @@ export default function OrdersManager({
   );
 }
 
-function LockIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="shrink-0 text-green-700"
-      aria-hidden="true"
-    >
-      <rect x="4" y="10" width="16" height="11" rx="2" />
-      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
-    </svg>
-  );
-}

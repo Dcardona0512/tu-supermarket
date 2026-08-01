@@ -7,6 +7,9 @@ import type { OrderStatus, PaymentMethod } from "@/lib/database.types";
 const VALID: OrderStatus[] = ["pendiente", "entregado", "cancelado"];
 const PAGOS: PaymentMethod[] = ["efectivo", "transferencia"];
 
+/** Estados de los que un pedido ya no sale. */
+const FINALES: OrderStatus[] = ["entregado", "cancelado"];
+
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
@@ -25,19 +28,19 @@ export async function updateOrderStatus(
 
   if (!VALID.includes(status)) return { ok: false, error: "Estado inválido" };
 
-  // Un pedido entregado ya se cobró y entró al cierre de caja de ese día:
-  // su estado queda fijo. La base lo impide con un trigger; aquí se avisa
-  // con un mensaje claro en vez de dejar salir el error de Postgres.
+  // Entregado y cancelado son finales: el primero ya se cobró y entró al
+  // cierre de caja, el segundo ya devolvió las unidades al inventario. La
+  // base lo impide con un trigger; aquí se traduce a un mensaje legible.
   const { data: actual } = await supabase
     .from("orders")
     .select("status")
     .eq("id", orderId)
     .single();
 
-  if (actual?.status === "entregado" && status !== "entregado") {
+  if (actual && FINALES.includes(actual.status as OrderStatus)) {
     return {
       ok: false,
-      error: "El pedido ya fue entregado: su estado no se puede cambiar.",
+      error: `El pedido está ${actual.status}: su estado ya no se puede cambiar.`,
     };
   }
 
