@@ -31,7 +31,7 @@ export default function ResetDemoButton() {
         return;
       }
       setResultado(
-        `Listo: ${r.productos} productos y ${r.categorias} categorías. Pedidos borrados.`
+        `Listo: ${r.productos} productos, ${r.categorias} categorías y ${r.pedidos} pedidos de ejemplo.`
       );
       router.refresh();
     });
@@ -41,8 +41,9 @@ export default function ResetDemoButton() {
     <section className="mt-6 rounded-xl border border-black/5 bg-white p-5">
       <h2 className="text-sm font-bold">Restaurar la demostración</h2>
       <p className="mt-1 text-xs text-neutral-500">
-        Vuelve a dejar el catálogo de ejemplo como estaba y borra todos los
-        pedidos. Útil después de que alguien pruebe el panel.
+        Vuelve a dejar el catálogo de ejemplo como estaba y recrea los tres
+        pedidos de muestra: uno pendiente, uno entregado y uno cancelado. Útil
+        después de que alguien pruebe el panel.
       </p>
 
       {!confirmando ? (
@@ -60,8 +61,8 @@ export default function ResetDemoButton() {
       ) : (
         <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3">
           <p className="text-xs font-medium text-amber-900">
-            Esto borra todos los pedidos y el inventario actual, y no se puede
-            deshacer. ¿Seguro?
+            Esto borra los pedidos y el inventario actuales y los reemplaza por
+            los de ejemplo. No se puede deshacer. ¿Seguro?
           </p>
           <div className="mt-2.5 flex flex-wrap gap-2">
             <button

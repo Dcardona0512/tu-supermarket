@@ -8,7 +8,8 @@ import { createClient } from "@/lib/supabase/server";
  *
  * El panel está abierto para que cualquiera lo pruebe, así que hace falta
  * poder deshacer lo que dejen: borra pedidos, inventario, productos y
- * categorías, y vuelve a sembrar el catálogo de ejemplo.
+ * categorías, y vuelve a sembrar el catálogo y los tres pedidos de ejemplo,
+ * uno en cada estado.
  *
  * El trabajo real lo hace la función `reset_demo` en Postgres, en una sola
  * transacción, para no quedarse a medias si algo falla.
@@ -17,6 +18,7 @@ export async function resetDemo(): Promise<{
   ok: boolean;
   productos?: number;
   categorias?: number;
+  pedidos?: number;
   error?: string;
 }> {
   const supabase = await createClient();
@@ -28,7 +30,11 @@ export async function resetDemo(): Promise<{
   const { data, error } = await supabase.rpc("reset_demo");
   if (error) return { ok: false, error: error.message };
 
-  const resumen = data as { productos?: number; categorias?: number } | null;
+  const resumen = data as {
+    productos?: number;
+    categorias?: number;
+    pedidos?: number;
+  } | null;
 
   for (const ruta of [
     "/",
@@ -46,5 +52,6 @@ export async function resetDemo(): Promise<{
     ok: true,
     productos: resumen?.productos,
     categorias: resumen?.categorias,
+    pedidos: resumen?.pedidos,
   };
 }
