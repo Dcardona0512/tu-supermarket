@@ -5,19 +5,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toLoginEmail } from "@/lib/admin-user";
 
-/**
- * Credenciales de la cuenta de demostración, para que cualquiera pueda
- * recorrer el panel sin pedir acceso.
- *
- * Se leen del entorno y no van escritas aquí: una tienda que instale el
- * sistema simplemente no las define, y entonces el formulario no muestra
- * ninguna pista. Al ser NEXT_PUBLIC_ quedan a la vista en el navegador,
- * que es justo lo que se busca; no usar nunca con datos reales.
- */
-const DEMO_USER = process.env.NEXT_PUBLIC_DEMO_USER;
-const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD;
-const HAY_DEMO = Boolean(DEMO_USER && DEMO_PASSWORD);
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const [user, setUser] = useState("");
@@ -70,7 +57,6 @@ export default function AdminLoginPage() {
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}
-              placeholder={DEMO_USER}
               className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               required
             />
@@ -87,7 +73,6 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                placeholder={DEMO_PASSWORD}
                 className="w-full rounded-lg border border-black/10 py-2 pl-3 pr-11 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
                 required
               />
@@ -119,20 +104,6 @@ export default function AdminLoginPage() {
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
-
-        {/* Sin esto, los datos en gris del formulario parecen un ejemplo de
-            formato y nadie los escribe. */}
-        {HAY_DEMO && (
-          <div className="mt-5 rounded-lg border border-brand/20 bg-brand/5 px-3 py-2.5 text-center">
-            <p className="text-xs font-semibold text-brand-dark">
-              Panel de demostración
-            </p>
-            <p className="mt-1 text-xs text-neutral-600">
-              Escribe los datos que aparecen en gris para entrar y mirar todo
-              con libertad.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

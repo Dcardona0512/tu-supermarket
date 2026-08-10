@@ -1,9 +1,12 @@
 -- Datos de demostración de TU SUPERMARKET.
 --
 -- La siembra no vive en este archivo sino en la función `reset_demo()` de la
--- base de datos, para que el botón «Restaurar la demostración» del panel y una
--- ejecución manual dejen exactamente el mismo resultado. Si estuviera duplicada
--- aquí, los dos caminos acabarían divergiendo.
+-- base de datos; aquí solo se la invoca. Si el SQL estuviera duplicado, las dos
+-- copias acabarían divergiendo.
+--
+-- La función solo es ejecutable por los roles administrativos: borra productos,
+-- categorías, pedidos e inventario sin filtro, así que no se concede a los
+-- usuarios de la aplicación. Se ejecuta desde el editor SQL de Supabase.
 --
 -- Deja el sistema así:
 --   · 6 categorías y 15 subcategorías

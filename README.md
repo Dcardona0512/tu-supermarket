@@ -48,11 +48,17 @@ El login usa un nombre de usuario, no un correo: internamente se convierte a
 `<usuario>@tusupermarket.com` (ver `src/lib/admin-user.ts`). El usuario se crea desde
 el panel de Supabase, en **Authentication → Add user**, con ese formato de correo.
 
-## Datos de demostración
+## Datos de ejemplo
 
-`supabase/seed-demo.sql` carga 6 categorías, 15 subcategorías y 24 productos de
-ejemplo con precios en COP, apuntando a las ilustraciones de `public/demo/`.
-Sirve para mostrar el sistema antes de que la tienda cargue su inventario real.
+`supabase/seed-demo.sql` deja una tienda con 6 categorías, 15 subcategorías, 24
+productos con precios en COP e imágenes de `public/demo/`, y tres pedidos, uno en
+cada estado. Sirve para enseñar el sistema antes de que una tienda cargue su
+inventario real.
+
+Se ejecuta **desde el editor SQL de Supabase**: la función que hace el trabajo
+borra productos, categorías, pedidos e inventario sin filtro, así que no está
+concedida a los usuarios de la aplicación y no se puede invocar desde la web.
+
 Para dejar el catálogo en blanco: `delete from products; delete from categories;`.
 
 ## Modelo de datos (Supabase)
