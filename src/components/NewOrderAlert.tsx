@@ -20,8 +20,12 @@ type Aviso = {
  *
  * Escucha la base de datos en vivo, así que aparece sin recargar la página.
  * No se cierra solo: hay que descartarlo para no perder ninguna orden.
+ *
+ * El canal y el filtro llevan la tienda: con un canal compartido, a cada dueño
+ * le sonaría la campana con los pedidos de los demás y vería el nombre de un
+ * cliente que no es suyo.
  */
-export default function NewOrderAlert() {
+export default function NewOrderAlert({ storeId }: { storeId: string }) {
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const router = useRouter();
 
@@ -42,14 +46,14 @@ export default function NewOrderAlert() {
       await supabase.realtime.setAuth(session.access_token);
 
       canal = supabase
-        .channel("pedidos-nuevos")
+        .channel(`pedidos-nuevos:${storeId}`)
         .on(
           "postgres_changes",
           {
             event: "INSERT",
             schema: "public",
             table: "orders",
-            filter: "channel=eq.linea",
+            filter: `store_id=eq.${storeId}`,
           },
           (payload) => {
             const o = payload.new as {
@@ -57,7 +61,13 @@ export default function NewOrderAlert() {
               order_number: number;
               customer_name: string | null;
               total: number;
+              channel: string;
             };
+
+            // Realtime admite un solo filtro y lo gasta la tienda, así que el
+            // origen se comprueba aquí: una venta de mostrador la acaba de
+            // hacer el propio cajero y no tiene sentido avisarle.
+            if (o.channel !== "linea") return;
 
             setAvisos((prev) =>
               prev.some((a) => a.id === o.id)
@@ -116,7 +126,7 @@ export default function NewOrderAlert() {
       auth.subscription.unsubscribe();
       if (canal) supabase.removeChannel(canal);
     };
-  }, [router]);
+  }, [router, storeId]);
 
   if (avisos.length === 0) return null;
 

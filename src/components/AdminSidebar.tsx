@@ -28,10 +28,16 @@ const LINKS: NavLink[] = [
 export default function AdminSidebar({
   user,
   pendingOrders = 0,
+  storeName,
+  storeSlug,
 }: {
   user: string;
   /** Pedidos en línea sin atender, para avisar en el menú. */
   pendingOrders?: number;
+  /** Nombre de la tienda del dueño, en la cabecera del menú. */
+  storeName: string;
+  /** Para que "Ver tienda" lleve a su enlace público. */
+  storeSlug: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -68,8 +74,11 @@ export default function AdminSidebar({
             TS
           </span>
           {open && (
-            <span className="ml-1 min-w-0 flex-1 truncate text-sm font-bold">
-              Panel · TU SUPERMARKET
+            <span
+              className="ml-1 min-w-0 flex-1 truncate text-sm font-bold"
+              title={storeName}
+            >
+              {storeName}
             </span>
           )}
           <button
@@ -124,6 +133,8 @@ export default function AdminSidebar({
 
         {/* Pie: tienda, usuario y salir */}
         <div className="shrink-0 border-t border-black/5 p-2">
+          {/* Mientras la tienda pública siga en la raíz, esto apunta a "/".
+              Cuando cada tienda tenga su ruta pasa a ser `/${storeSlug}`. */}
           <Link
             href="/"
             target="_blank"

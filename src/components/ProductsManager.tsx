@@ -21,6 +21,8 @@ import type { Category, Product } from "@/lib/database.types";
 type Props = {
   products: Product[];
   categories: Category[];
+  /** Tienda del dueño: da nombre a su carpeta de fotos en el bucket. */
+  storeId: string;
 };
 
 const emptyForm: ProductInput = {
@@ -39,7 +41,11 @@ const emptyForm: ProductInput = {
   expires_at: null,
 };
 
-export default function ProductsManager({ products, categories }: Props) {
+export default function ProductsManager({
+  products,
+  categories,
+  storeId,
+}: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState<ProductInput | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -257,6 +263,7 @@ export default function ProductsManager({ products, categories }: Props) {
         <ProductForm
           initial={editing}
           categories={categories}
+          storeId={storeId}
           onClose={() => setShowForm(false)}
           onSaved={() => {
             setShowForm(false);
@@ -279,11 +286,13 @@ export default function ProductsManager({ products, categories }: Props) {
 function ProductForm({
   initial,
   categories,
+  storeId,
   onClose,
   onSaved,
 }: {
   initial: ProductInput;
   categories: Category[];
+  storeId: string;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -311,7 +320,9 @@ function ProductForm({
     const file = await compressImage(original);
 
     const supabase = createClient();
-    const path = `${crypto.randomUUID()}.jpg`;
+    // Una carpeta por tienda: las políticas del bucket comprueban que el
+    // primer segmento sea la tienda de quien sube.
+    const path = `${storeId}/${crypto.randomUUID()}.jpg`;
     const { error: upErr } = await supabase.storage
       .from("product-images")
       .upload(path, file, {
