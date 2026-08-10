@@ -354,6 +354,7 @@ function ProductForm({
       name: name.trim(),
       parent_id: null,
       created_at: "",
+      store_id: res.storeId ?? "",
     };
     setCats((c) => [...c, newCat]);
     set("category_id", res.id);

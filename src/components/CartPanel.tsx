@@ -5,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
+import { useStore } from "@/lib/store-context";
 import { formatCOP } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
-import { DELIVERY_FEE } from "@/lib/delivery";
 
 /** Celular colombiano: 10 dígitos que empiezan por 3. */
 function isValidPhone(value: string): boolean {
@@ -28,6 +28,7 @@ export default function CartPanel({
 }) {
   const { items, totalPrice, setQuantity, removeItem, clear, ready, closePanel } =
     useCart();
+  const store = useStore();
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -59,6 +60,7 @@ export default function CartPanel({
     setSubmitting(true);
     const supabase = createClient();
     const { data, error: rpcError } = await supabase.rpc("create_order", {
+      p_store_id: store.id,
       p_customer_name: name,
       p_customer_phone: phone,
       p_customer_address: address,
@@ -215,12 +217,12 @@ export default function CartPanel({
             </div>
             <div className="flex items-center justify-between text-neutral-500">
               <span>Domicilio</span>
-              <span>{formatCOP(DELIVERY_FEE)}</span>
+              <span>{formatCOP(store.deliveryFee)}</span>
             </div>
             <div className="flex items-center justify-between border-t border-black/5 pt-2">
               <span className="font-medium">Total a pagar</span>
               <span className="text-lg font-bold">
-                {formatCOP(totalPrice + DELIVERY_FEE)}
+                {formatCOP(totalPrice + store.deliveryFee)}
               </span>
             </div>
             <p className="pt-1 text-xs text-neutral-500">

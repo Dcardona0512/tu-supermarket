@@ -159,20 +159,22 @@ function categoryError(message: string): string {
 export async function createCategory(
   name: string,
   parentId?: string | null
-): Promise<ActionResult & { id?: string }> {
+): Promise<ActionResult & { id?: string; storeId?: string }> {
   try {
     const supabase = await requireAdmin();
     if (!name.trim()) return { ok: false, error: "Nombre requerido" };
+    // `store_id` lo pone el trigger; se lee de vuelta para que la lista del
+    // navegador pueda añadir la categoría sin recargar la página.
     const { data, error } = await supabase
       .from("categories")
       .insert({ name: name.trim(), parent_id: parentId ?? null })
-      .select("id")
+      .select("id, store_id")
       .single();
     if (error) return { ok: false, error: categoryError(error.message) };
     revalidatePath("/admin/productos");
     revalidatePath("/admin/venta");
     revalidatePath("/");
-    return { ok: true, id: data.id };
+    return { ok: true, id: data.id, storeId: data.store_id };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }

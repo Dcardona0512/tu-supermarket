@@ -1,3 +1,11 @@
+// Generado desde el esquema de Supabase, con dos ajustes hechos a mano que hay
+// que volver a aplicar si se regenera:
+//
+//  1. `store_id` es opcional en los Insert. En la base es NOT NULL, pero lo
+//     rellena el trigger `set_store_id` con la tienda del usuario, así que el
+//     código no tiene que pasarlo.
+//  2. El bloque "Alias de conveniencia" del final no lo genera Supabase.
+
 export type Json =
   | string
   | number
@@ -7,8 +15,10 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -18,18 +28,21 @@ export type Database = {
           id: string
           name: string
           parent_id: string | null
+          store_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
           parent_id?: string | null
+          store_id?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
           parent_id?: string | null
+          store_id?: string
         }
         Relationships: [
           {
@@ -37,6 +50,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
@@ -48,6 +68,7 @@ export type Database = {
           product_id: string | null
           product_name: string
           quantity: number
+          store_id: string
           subtotal: number
           unit_cost: number
           unit_price: number
@@ -58,6 +79,7 @@ export type Database = {
           product_id?: string | null
           product_name: string
           quantity: number
+          store_id?: string
           subtotal: number
           unit_cost?: number
           unit_price: number
@@ -68,6 +90,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           quantity?: number
+          store_id?: string
           subtotal?: number
           unit_cost?: number
           unit_price?: number
@@ -87,6 +110,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_items_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
@@ -101,9 +131,10 @@ export type Database = {
           delivery_fee: number
           id: string
           notes: string | null
-          order_number: number
+          order_number: number | null
           payment_method: string
           status: string
+          store_id: string
           total: number
         }
         Insert: {
@@ -117,9 +148,10 @@ export type Database = {
           delivery_fee?: number
           id?: string
           notes?: string | null
-          order_number?: never
+          order_number?: number | null
           payment_method?: string
           status?: string
+          store_id?: string
           total?: number
         }
         Update: {
@@ -133,12 +165,21 @@ export type Database = {
           delivery_fee?: number
           id?: string
           notes?: string | null
-          order_number?: never
+          order_number?: number | null
           payment_method?: string
           status?: string
+          store_id?: string
           total?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -156,6 +197,7 @@ export type Database = {
           name: string
           price: number
           stock: number
+          store_id: string
           unit: string
           updated_at: string
         }
@@ -174,6 +216,7 @@ export type Database = {
           name: string
           price: number
           stock?: number
+          store_id?: string
           unit?: string
           updated_at?: string
         }
@@ -192,6 +235,7 @@ export type Database = {
           name?: string
           price?: number
           stock?: number
+          store_id?: string
           unit?: string
           updated_at?: string
         }
@@ -201,6 +245,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
             referencedColumns: ["id"]
           },
         ]
@@ -213,6 +264,7 @@ export type Database = {
           product_id: string | null
           product_name: string
           quantity: number
+          store_id: string
         }
         Insert: {
           created_at?: string
@@ -221,6 +273,7 @@ export type Database = {
           product_id?: string | null
           product_name: string
           quantity: number
+          store_id?: string
         }
         Update: {
           created_at?: string
@@ -229,6 +282,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           quantity?: number
+          store_id?: string
         }
         Relationships: [
           {
@@ -238,7 +292,53 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stock_entries_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      stores: {
+        Row: {
+          address: string | null
+          created_at: string
+          delivery_fee: number
+          id: string
+          is_published: boolean
+          name: string
+          owner_id: string
+          phone: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          delivery_fee?: number
+          id?: string
+          is_published?: boolean
+          name: string
+          owner_id: string
+          phone?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          delivery_fee?: number
+          id?: string
+          is_published?: boolean
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -247,24 +347,17 @@ export type Database = {
     Functions: {
       add_stock: {
         Args: {
+          p_expires_at?: string
           p_product_id: string
           p_quantity: number
-          p_expires_at?: string
         }
         Returns: {
-          product_name: string
+          expires_at: string
           new_stock: number
-          expires_at: string | null
+          product_name: string
         }[]
       }
-      cash_closing: {
-        Args: { p_date?: string }
-        Returns: Json
-      }
-      reset_demo: {
-        Args: Record<string, never>
-        Returns: Json
-      }
+      cash_closing: { Args: { p_date?: string }; Returns: Json }
       create_order: {
         Args: {
           p_customer_address: string
@@ -272,6 +365,7 @@ export type Database = {
           p_customer_phone: string
           p_items: Json
           p_notes: string
+          p_store_id: string
         }
         Returns: {
           order_id: string
@@ -292,6 +386,8 @@ export type Database = {
         }[]
       }
       get_order_public: { Args: { p_order_id: string }; Returns: Json }
+      next_order_number: { Args: { p_store_id: string }; Returns: number }
+      reset_demo: { Args: Record<string, never>; Returns: Json }
       sales_report: {
         Args: { p_from?: string; p_granularity?: string; p_to?: string }
         Returns: Json
@@ -389,6 +485,40 @@ export type TablesUpdate<
       : never
     : never
 
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
 export const Constants = {
   public: {
     Enums: {},
@@ -400,6 +530,7 @@ export type Category = Database["public"]["Tables"]["categories"]["Row"]
 export type Product = Database["public"]["Tables"]["products"]["Row"]
 export type Order = Database["public"]["Tables"]["orders"]["Row"]
 export type OrderItem = Database["public"]["Tables"]["order_items"]["Row"]
+export type Store = Database["public"]["Tables"]["stores"]["Row"]
 
 export type OrderStatus = "pendiente" | "entregado" | "cancelado"
 
