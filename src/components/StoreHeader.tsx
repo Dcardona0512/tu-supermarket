@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useStore } from "@/lib/store-context";
 
@@ -12,9 +13,23 @@ export default function StoreHeader() {
     <header className="sticky top-0 z-40 h-[var(--header-h)] border-b border-black/5 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand text-lg font-black text-white">
-            {store.initials}
-          </span>
+          {/* Con logo se usa la imagen; sin él, las iniciales sobre el color
+              de la tienda. Nadie queda con un hueco por no tener uno. */}
+          {store.logoUrl ? (
+            <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+              <Image
+                src={store.logoUrl}
+                alt={store.name}
+                fill
+                sizes="36px"
+                className="object-cover"
+              />
+            </span>
+          ) : (
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand text-lg font-black text-white">
+              {store.initials}
+            </span>
+          )}
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-sm font-bold text-foreground">
               {store.name}

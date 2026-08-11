@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
 
     if (signInError) {
       setLoading(false);
-      setError("Usuario o contraseña incorrectos.");
+      setError("Correo o contraseña incorrectos.");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-xs font-medium text-neutral-600">
-              Usuario
+              Correo
             </label>
             <input
               type="text"

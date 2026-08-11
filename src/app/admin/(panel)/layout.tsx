@@ -42,11 +42,19 @@ export default async function PanelLayout({
 
   // Pedidos web sin atender: se muestran como aviso en el menú. Las políticas
   // ya lo limitan a esta tienda.
-  const { count: pendingOrders } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .eq("channel", "linea")
-    .eq("status", "pendiente");
+  const [{ count: pendingOrders }, { data: esAdminPlataforma }] =
+    await Promise.all([
+      supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .eq("channel", "linea")
+        .eq("status", "pendiente"),
+      supabase
+        .from("platform_admins")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    ]);
 
   return (
     <div className="min-h-screen bg-neutral-100">
@@ -55,6 +63,7 @@ export default async function PanelLayout({
         pendingOrders={pendingOrders ?? 0}
         storeName={store.name}
         storeSlug={store.slug}
+        isPlatformAdmin={Boolean(esAdminPlataforma)}
       />
       {/* Espacio para la franja lateral de iconos */}
       <div className="pl-20">

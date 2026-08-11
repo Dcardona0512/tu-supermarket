@@ -1,5 +1,7 @@
-/** Lado máximo de la foto guardada. Suficiente para verla con zoom. */
+/** Lado máximo de la foto de producto. Suficiente para verla con zoom. */
 const MAX_SIDE = 1400;
+/** Un logo se ve pequeño en la cabecera: no necesita el tamaño de una foto. */
+export const LOGO_SIDE = 320;
 const QUALITY = 0.82;
 
 /**
@@ -11,7 +13,10 @@ const QUALITY = 0.82;
  *
  * Si el resultado no mejora el original, se devuelve el archivo tal cual.
  */
-export async function compressImage(file: File): Promise<File> {
+export async function compressImage(
+  file: File,
+  maxSide: number = MAX_SIDE
+): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
 
   try {
@@ -19,7 +24,7 @@ export async function compressImage(file: File): Promise<File> {
       imageOrientation: "from-image",
     });
 
-    const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
 

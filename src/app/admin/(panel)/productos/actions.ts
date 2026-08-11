@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { requireStore } from "@/lib/store";
 
 export type ProductInput = {
   id?: string;
@@ -24,17 +24,20 @@ export type ProductInput = {
 type ActionResult = { ok: boolean; error?: string };
 
 function productError(message: string): string {
-  return message.includes("products_barcode_key")
+  return message.includes("products_barcode")
     ? "Ese código de barras ya está asignado a otro producto"
     : message;
 }
 
+/**
+ * Puerta de autorización del panel.
+ *
+ * Antes había aquí un `requireAdmin` que solo comprobaba que existiera un
+ * usuario, sin verificar que tuviera tienda. `requireStore` exige las dos
+ * cosas, y es la única puerta en todo el panel.
+ */
 async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("No autorizado");
+  const { supabase } = await requireStore();
   return supabase;
 }
 

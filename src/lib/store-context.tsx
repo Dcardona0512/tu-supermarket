@@ -18,8 +18,12 @@ export type StoreInfo = {
   initials: string;
   /** Color de marca en hexadecimal. */
   brandColor: string;
+  /** Logo de la tienda. Si es null, se usan las iniciales. */
+  logoUrl: string | null;
   /** Frase corta bajo el nombre, si la tienda puso una. */
   tagline: string | null;
+  phone: string | null;
+  address: string | null;
   /** Lo que cobra esta tienda por el domicilio, en pesos. */
   deliveryFee: number;
 };

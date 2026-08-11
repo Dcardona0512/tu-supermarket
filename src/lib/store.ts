@@ -8,12 +8,16 @@ type StoreRow = {
   slug: string;
   name: string;
   brand_color: string;
+  logo_url: string | null;
   tagline: string | null;
+  phone: string | null;
+  address: string | null;
   delivery_fee: number;
   is_published: boolean;
 };
 
-const CAMPOS = "id, slug, name, brand_color, tagline, delivery_fee, is_published";
+const CAMPOS =
+  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published";
 
 function toStoreInfo(row: StoreRow): StoreInfo {
   return {
@@ -22,7 +26,10 @@ function toStoreInfo(row: StoreRow): StoreInfo {
     name: row.name,
     initials: initials(row.name),
     brandColor: row.brand_color,
+    logoUrl: row.logo_url,
     tagline: row.tagline,
+    phone: row.phone,
+    address: row.address,
     deliveryFee: Number(row.delivery_fee),
   };
 }

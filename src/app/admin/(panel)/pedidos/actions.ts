@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { requireStore } from "@/lib/store";
 import type { OrderStatus, PaymentMethod } from "@/lib/database.types";
 
 const VALID: OrderStatus[] = ["pendiente", "entregado", "cancelado"];
@@ -20,11 +20,12 @@ export async function updateOrderStatus(
    */
   paymentMethod?: PaymentMethod
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "No autorizado" };
+  let supabase;
+  try {
+    ({ supabase } = await requireStore());
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
 
   if (!VALID.includes(status)) return { ok: false, error: "Estado inválido" };
 

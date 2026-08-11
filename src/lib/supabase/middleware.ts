@@ -31,7 +31,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAdminArea = path.startsWith("/admin");
+  const isAdminArea =
+    path.startsWith("/admin") || path.startsWith("/plataforma");
   const isLoginPage = path === "/admin/login";
 
   // Proteger el dashboard: sin sesión -> login

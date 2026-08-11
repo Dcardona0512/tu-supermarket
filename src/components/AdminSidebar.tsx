@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { initials } from "@/lib/brand";
+
+/** Nombre de la herramienta, el mismo para todas las tiendas que la usan. */
+const PLATAFORMA = "TU SUPERMARKET";
 
 type NavLink = {
   href: string;
@@ -20,6 +22,7 @@ const LINKS: NavLink[] = [
   { href: "/admin/productos", label: "Productos", icon: <IconTag /> },
   { href: "/admin/pedidos", label: "Pedidos", icon: <IconList /> },
   { href: "/admin/informes", label: "Informes", icon: <IconChart /> },
+  { href: "/admin/tienda", label: "Personalizar tienda", icon: <IconPaint /> },
 ];
 
 /**
@@ -31,6 +34,7 @@ export default function AdminSidebar({
   pendingOrders = 0,
   storeName,
   storeSlug,
+  isPlatformAdmin = false,
 }: {
   user: string;
   /** Pedidos en línea sin atender, para avisar en el menú. */
@@ -39,6 +43,8 @@ export default function AdminSidebar({
   storeName: string;
   /** Para que "Ver tienda" lleve a su enlace público. */
   storeSlug: string;
+  /** Solo quien administra la plataforma ve el acceso a su panel. */
+  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -71,15 +77,22 @@ export default function AdminSidebar({
       >
         {/* Logo y botón de menú, ambos dentro del ancho de la franja */}
         <div className="flex h-14 shrink-0 items-center gap-1 border-b border-black/5 px-1.5">
+          {/* La marca es de la herramienta, no de la tienda: el tendero debe
+              saber qué sistema está usando. Su negocio va debajo. */}
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-black text-white">
-            {initials(storeName)}
+            TS
           </span>
           {open && (
-            <span
-              className="ml-1 min-w-0 flex-1 truncate text-sm font-bold"
-              title={storeName}
-            >
-              {storeName}
+            <span className="ml-1 min-w-0 flex-1 leading-tight">
+              <span className="block truncate text-sm font-bold">
+                {PLATAFORMA}
+              </span>
+              <span
+                className="block truncate text-xs text-neutral-500"
+                title={storeName}
+              >
+                {storeName}
+              </span>
             </span>
           )}
           <button
@@ -150,6 +163,24 @@ export default function AdminSidebar({
             </span>
             {open && <span className="truncate">Ver tienda</span>}
           </Link>
+
+          {/* Solo para quien administra la plataforma; una tienda cualquiera no
+              sabe que esta pantalla existe. */}
+          {isPlatformAdmin && (
+            <Link
+              href="/plataforma"
+              title="Administrar plataforma"
+              onClick={close}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 ${
+                open ? "" : "justify-center px-0"
+              }`}
+            >
+              <span className="shrink-0">
+                <IconShield />
+              </span>
+              {open && <span className="truncate">Plataforma</span>}
+            </Link>
+          )}
 
           {open && (
             <p className="truncate px-3 pt-2 text-xs text-neutral-400">
@@ -257,6 +288,25 @@ function IconStore() {
     <svg {...svgProps()}>
       <path d="M4 9h16v11H4zM3 9l1.5-5h15L21 9" />
       <path d="M9 20v-6h6v6" />
+    </svg>
+  );
+}
+
+/** Escudo: administración de la plataforma. */
+function IconShield() {
+  return (
+    <svg {...svgProps()}>
+      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z" />
+    </svg>
+  );
+}
+
+/** Brocha: personalizar el aspecto de la tienda. */
+function IconPaint() {
+  return (
+    <svg {...svgProps()}>
+      <path d="M19 3H5a2 2 0 0 0-2 2v4h18V5a2 2 0 0 0-2-2Z" />
+      <path d="M13 9v4a2 2 0 0 1-2 2h-1v3a2 2 0 0 0 4 0v-3" />
     </svg>
   );
 }

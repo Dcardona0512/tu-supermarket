@@ -301,6 +301,48 @@ export type Database = {
           },
         ]
       }
+      platform_admins: {
+        Row: { created_at: string; user_id: string }
+        Insert: { created_at?: string; user_id: string }
+        Update: { created_at?: string; user_id?: string }
+        Relationships: []
+      }
+      store_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          slug: string
+          store_name: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          slug: string
+          store_name: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          slug?: string
+          store_name?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       stores: {
         Row: {
           address: string | null
@@ -309,6 +351,7 @@ export type Database = {
           delivery_fee: number
           id: string
           is_published: boolean
+          logo_url: string | null
           name: string
           owner_id: string
           phone: string | null
@@ -323,6 +366,7 @@ export type Database = {
           delivery_fee?: number
           id?: string
           is_published?: boolean
+          logo_url?: string | null
           name: string
           owner_id: string
           phone?: string | null
@@ -337,6 +381,7 @@ export type Database = {
           delivery_fee?: number
           id?: string
           is_published?: boolean
+          logo_url?: string | null
           name?: string
           owner_id?: string
           phone?: string | null
@@ -364,6 +409,9 @@ export type Database = {
         }[]
       }
       cash_closing: { Args: { p_date?: string }; Returns: Json }
+      generar_codigo_invitacion: { Args: Record<string, never>; Returns: string }
+      is_platform_admin: { Args: Record<string, never>; Returns: boolean }
+      my_store_id: { Args: Record<string, never>; Returns: string }
       create_order: {
         Args: {
           p_customer_address: string
