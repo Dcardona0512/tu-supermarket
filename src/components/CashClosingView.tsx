@@ -373,8 +373,23 @@ function PrintableClosing({
         </div>
       </div>
 
-      <p style={{ marginTop: 16, fontSize: "8pt", color: "#555" }}>
-        Generado el {new Date().toLocaleString("es-CO")}
+      {/* El encabezado lleva el negocio, porque el arqueo es su documento
+          contable. La herramienta va al pie: es un papel que el tendero maneja
+          a diario y que a veces enseña a terceros. */}
+      <p
+        style={{
+          marginTop: 16,
+          borderTop: "1px solid #ddd",
+          paddingTop: 6,
+          fontSize: "8pt",
+          color: "#555",
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        <span>Generado el {new Date().toLocaleString("es-CO")}</span>
+        <span style={{ fontWeight: 700 }}>TU SUPERMARKET</span>
       </p>
     </div>
   );
