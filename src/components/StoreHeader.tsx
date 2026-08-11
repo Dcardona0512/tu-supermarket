@@ -2,24 +2,28 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { useStore } from "@/lib/store-context";
 
 export default function StoreHeader() {
   const { totalItems, panelOpen, togglePanel } = useCart();
+  const store = useStore();
 
   return (
     <header className="sticky top-0 z-40 h-[var(--header-h)] border-b border-black/5 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand text-lg font-black text-white">
-            TS
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand text-lg font-black text-white">
+            {store.initials}
           </span>
-          <span className="leading-tight">
-            <span className="block text-sm font-bold tracking-wide text-foreground">
-              TU SUPERMARKET
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-sm font-bold text-foreground">
+              {store.name}
             </span>
-            <span className="block text-xs text-neutral-500">
-              Pedidos a domicilio
-            </span>
+            {store.tagline && (
+              <span className="block truncate text-xs text-neutral-500">
+                {store.tagline}
+              </span>
+            )}
           </span>
         </Link>
 

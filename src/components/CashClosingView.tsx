@@ -31,8 +31,11 @@ function longDate(iso: string): string {
 
 export default function CashClosingView({
   initial,
+  storeName,
 }: {
   initial: CashClosing | null;
+  /** Encabeza el comprobante impreso. */
+  storeName: string;
 }) {
   const [date, setDate] = useState(initial?.date ?? today());
   const [data, setData] = useState<CashClosing | null>(initial);
@@ -230,6 +233,7 @@ export default function CashClosingView({
         data={data}
         counted={countedNum}
         diff={diff}
+        storeName={storeName}
       />
     </div>
   );
@@ -246,11 +250,13 @@ function PrintableClosing({
   data,
   counted,
   diff,
+  storeName,
 }: {
   date: string;
   data: CashClosing | null;
   counted: number | null;
   diff: number | null;
+  storeName: string;
 }) {
   const t = data?.totals;
   const ventas = data?.sales ?? [];
@@ -259,7 +265,7 @@ function PrintableClosing({
     <div className="hoja-impresion">
       <div style={{ borderBottom: "2px solid #000", paddingBottom: 8 }}>
         <h1 style={{ fontSize: "16pt", fontWeight: 800, letterSpacing: 1 }}>
-          TU SUPERMARKET
+          {storeName}
         </h1>
         <p style={{ fontSize: "12pt", fontWeight: 700, marginTop: 2 }}>
           Cierre de caja

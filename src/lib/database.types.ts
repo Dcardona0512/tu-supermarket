@@ -304,6 +304,7 @@ export type Database = {
       stores: {
         Row: {
           address: string | null
+          brand_color: string
           created_at: string
           delivery_fee: number
           id: string
@@ -312,10 +313,12 @@ export type Database = {
           owner_id: string
           phone: string | null
           slug: string
+          tagline: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          brand_color?: string
           created_at?: string
           delivery_fee?: number
           id?: string
@@ -324,10 +327,12 @@ export type Database = {
           owner_id: string
           phone?: string | null
           slug: string
+          tagline?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          brand_color?: string
           created_at?: string
           delivery_fee?: number
           id?: string
@@ -336,6 +341,7 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           slug?: string
+          tagline?: string | null
           updated_at?: string
         }
         Relationships: []

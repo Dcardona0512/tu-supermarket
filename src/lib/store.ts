@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { initials } from "@/lib/brand";
 import type { StoreInfo } from "@/lib/store-context";
 
 /** Fila de `stores` tal como la devuelve Supabase. */
@@ -6,17 +7,22 @@ type StoreRow = {
   id: string;
   slug: string;
   name: string;
+  brand_color: string;
+  tagline: string | null;
   delivery_fee: number;
   is_published: boolean;
 };
 
-const CAMPOS = "id, slug, name, delivery_fee, is_published";
+const CAMPOS = "id, slug, name, brand_color, tagline, delivery_fee, is_published";
 
 function toStoreInfo(row: StoreRow): StoreInfo {
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    initials: initials(row.name),
+    brandColor: row.brand_color,
+    tagline: row.tagline,
     deliveryFee: Number(row.delivery_fee),
   };
 }

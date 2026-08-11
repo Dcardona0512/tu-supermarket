@@ -13,9 +13,12 @@ const TABS = [
 export default function ReportsView({
   report,
   closing,
+  storeName,
 }: {
   report: SalesReport;
   closing: CashClosing | null;
+  /** Encabeza el comprobante impreso del cierre. */
+  storeName: string;
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number]["value"]>("ventas");
 
@@ -40,7 +43,7 @@ export default function ReportsView({
       {tab === "ventas" ? (
         <SalesReportView initialReport={report} />
       ) : (
-        <CashClosingView initial={closing} />
+        <CashClosingView initial={closing} storeName={storeName} />
       )}
     </div>
   );

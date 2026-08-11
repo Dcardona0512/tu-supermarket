@@ -1,5 +1,5 @@
 import ReportsView from "@/components/ReportsView";
-import { createClient } from "@/lib/supabase/server";
+import { requireStore } from "@/lib/store";
 import type { CashClosing, SalesReport } from "@/lib/database.types";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,9 @@ const EMPTY: SalesReport = {
 };
 
 export default async function ReportsPage() {
-  const supabase = await createClient();
+  // El nombre de la tienda encabeza el comprobante impreso del cierre de caja:
+  // ese papel lo firma el negocio, no la plataforma.
+  const { supabase, store } = await requireStore();
 
   const [{ data: report }, { data: closing }] = await Promise.all([
     supabase.rpc("sales_report", { p_granularity: "day" }),
@@ -34,6 +36,7 @@ export default async function ReportsPage() {
     <ReportsView
       report={(report as unknown as SalesReport | null) ?? EMPTY}
       closing={(closing as unknown as CashClosing | null) ?? null}
+      storeName={store.name}
     />
   );
 }

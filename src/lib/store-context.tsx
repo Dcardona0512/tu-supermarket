@@ -6,14 +6,20 @@ import { createContext, useContext, type ReactNode } from "react";
  * La tienda que se está viendo.
  *
  * Los componentes de la tienda son todos de cliente y necesitan saber a qué
- * negocio pertenecen: para armar sus enlaces, para separar el carrito y para
- * decirle a `create_order` dónde va el pedido. Antes no hacía falta porque
- * había una sola.
+ * negocio pertenecen: para armar sus enlaces, para separar el carrito, para
+ * mostrar su marca y para decirle a `create_order` dónde va el pedido. Antes no
+ * hacía falta porque había una sola.
  */
 export type StoreInfo = {
   id: string;
   slug: string;
   name: string;
+  /** Iniciales del distintivo, calculadas desde el nombre. */
+  initials: string;
+  /** Color de marca en hexadecimal. */
+  brandColor: string;
+  /** Frase corta bajo el nombre, si la tienda puso una. */
+  tagline: string | null;
   /** Lo que cobra esta tienda por el domicilio, en pesos. */
   deliveryFee: number;
 };
