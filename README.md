@@ -1,7 +1,39 @@
 # TU SUPERMARKET
 
-Aplicación web de inventario y pedidos para tiendas tradicionales y supermercados.
-Los clientes navegan el catálogo y hacen pedidos con **pago contra entrega** (sin pasarela de pagos), y el administrador gestiona todo desde un dashboard.
+Plataforma de inventario y pedidos para tiendas tradicionales y supermercados.
+Cada tienda tiene su propio catálogo en línea con su marca, y su panel para
+gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
+
+## Direcciones
+
+| Ruta | Quién la usa |
+| --- | --- |
+| `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
+| `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
+| `/plataforma` | la administración de la plataforma: alta y suspensión de tiendas |
+| `/registro` | alta de una tienda con código de invitación |
+
+## Cambiar el dominio
+
+Las tiendas cuelgan de una ruta (`/mi-tienda`), no de un subdominio, así que
+mudarse de dominio **no toca código**:
+
+1. Comprar el dominio.
+2. En Vercel, *Project → Settings → Domains*, añadirlo al proyecto.
+3. Apuntar el DNS donde indique Vercel. El certificado HTTPS lo emite Vercel solo.
+4. Dejar el dominio viejo redirigiendo al nuevo, para no romper enlaces ya
+   compartidos.
+
+El panel no lleva el dominio escrito en ninguna parte: el enlace que se muestra
+al tendero en *Personalizar tienda* y el de registro se arman con el dominio
+desde el que se está navegando. En cuanto el dominio nuevo responda, el panel
+mostrará el enlace correcto sin desplegar nada.
+
+Para que el nombre de la tienda vaya **antes** del dominio
+(`mi-tienda.ejemplo.co`) sí haría falta trabajo: un dominio comodín en Vercel y
+un middleware que traduzca el subdominio a la ruta. Lo mismo para dominios
+propios de cada tienda (`www.mitienda.com`), que además necesitan una columna
+que relacione cada dominio con su tienda.
 
 ## Funcionalidades
 
