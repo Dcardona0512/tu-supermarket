@@ -441,7 +441,7 @@ export type Database = {
       }
       get_order_public: { Args: { p_order_id: string }; Returns: Json }
       next_order_number: { Args: { p_store_id: string }; Returns: number }
-      reset_demo: { Args: Record<string, never>; Returns: Json }
+      seed_store_catalog: { Args: { p_store_id: string }; Returns: Json }
       sales_report: {
         Args: { p_from?: string; p_granularity?: string; p_to?: string }
         Returns: Json

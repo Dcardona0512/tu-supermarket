@@ -74,24 +74,42 @@ Abre http://localhost:3000
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave publishable (segura para el navegador) |
 
-## Usuario del panel
+## Dar de alta una tienda
 
-El login usa un nombre de usuario, no un correo: internamente se convierte a
-`<usuario>@tusupermarket.com` (ver `src/lib/admin-user.ts`). El usuario se crea desde
-el panel de Supabase, en **Authentication → Add user**, con ese formato de correo.
+No hay registro abierto: nadie entra sin permiso.
 
-## Datos de ejemplo
+1. En `/plataforma`, generar un código de invitación con el nombre de la tienda y
+   su nombre corto, que es el que quedará en la URL y **no se puede cambiar
+   después**. El formulario muestra el enlace resultante mientras se escribe.
+2. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
+3. Él se registra con **su propio correo y la contraseña que elija**. La
+   plataforma nunca conoce esa contraseña.
 
-`supabase/seed-demo.sql` deja una tienda con 6 categorías, 15 subcategorías, 24
-productos con precios en COP e imágenes de `public/demo/`, y tres pedidos, uno en
-cada estado. Sirve para enseñar el sistema antes de que una tienda cargue su
-inventario real.
+El código lo valida la base de datos al crear la cuenta: si no sirve, el alta se
+aborta entera y no queda ningún usuario a medias. Cada código sirve una sola vez
+y caduca a los 30 días.
 
-Se ejecuta **desde el editor SQL de Supabase**: la función que hace el trabajo
-borra productos, categorías, pedidos e inventario sin filtro, así que no está
-concedida a los usuarios de la aplicación y no se puede invocar desde la web.
+Para dar de alta a un administrador de la plataforma hace falta una sentencia SQL
+sobre `platform_admins` — deliberadamente, para que nadie pueda ascenderse desde
+la aplicación.
 
-Para dejar el catálogo en blanco: `delete from products; delete from categories;`.
+## Catálogo de ejemplo
+
+Cada tienda **nace con 6 categorías, 15 subcategorías y 24 productos de muestra**
+con imágenes de `public/demo/`, para que el tendero vea cómo se verá su página y
+cómo se organizan las categorías antes de cargar lo suyo. Lo hace la función
+`seed_store_catalog(store_id)` desde el trigger del registro.
+
+No se siembran pedidos: contarían como ventas suyas y le ensuciarían los informes
+y el cierre de caja desde el primer día.
+
+El tendero quita lo que no le sirva desde **Productos** y ajusta las categorías
+con el botón **Categorías**.
+
+`seed_store_catalog` solo inserta, nunca borra, y no hace nada si la tienda ya
+tiene catálogo. **No existe ninguna función que borre datos en masa**: la que
+había (`reset_demo`) se eliminó porque no filtraba por tienda y podía vaciar el
+catálogo y el historial de ventas de todas.
 
 ## Modelo de datos (Supabase)
 
