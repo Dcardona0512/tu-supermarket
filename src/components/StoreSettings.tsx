@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage, formatBytes, LOGO_SIDE } from "@/lib/image";
@@ -34,7 +35,15 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const enlace = `tusupermarket.vercel.app/${store.slug}`;
+  // El dominio se toma del navegador y no se escribe a mano: así el enlace es
+  // correcto en producción, en una vista previa de Vercel o en local.
+  const [origen, setOrigen] = useState("");
+  useEffect(() => setOrigen(window.location.origin), []);
+
+  const enlaceCompleto = `${origen}/${store.slug}`;
+  const enlaceVisible = origen
+    ? `${origen.replace(/^https?:\/\//, "")}/${store.slug}`
+    : `/${store.slug}`;
 
   async function handleLogo(e: React.ChangeEvent<HTMLInputElement>) {
     const original = e.target.files?.[0];
@@ -161,12 +170,12 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <code className="min-w-0 flex-1 truncate rounded-lg bg-neutral-100 px-3 py-2 text-sm">
-              {enlace}
+              {enlaceVisible}
             </code>
             <button
               type="button"
               onClick={() => {
-                void navigator.clipboard?.writeText(`https://${enlace}`);
+                void navigator.clipboard?.writeText(enlaceCompleto);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 1500);
               }}
@@ -174,6 +183,13 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
             >
               {copied ? "¡Copiado!" : "Copiar"}
             </button>
+            <Link
+              href={`/${store.slug}`}
+              target="_blank"
+              className="shrink-0 rounded-lg border border-black/10 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
+            >
+              Abrir
+            </Link>
           </div>
         </section>
 

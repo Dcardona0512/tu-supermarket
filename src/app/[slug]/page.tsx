@@ -5,11 +5,13 @@ import { getStoreBySlug } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-/** Mismo valor transitorio que el layout: ver el comentario de allí. */
-const SLUG_POR_DEFECTO = "demo";
-
-export default async function StorePage() {
-  const store = await getStoreBySlug(SLUG_POR_DEFECTO);
+export default async function StorePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const store = await getStoreBySlug(slug);
   if (!store) notFound();
 
   const supabase = await createClient();

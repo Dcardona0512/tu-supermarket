@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
-import { useStore } from "@/lib/store-context";
+import { useStore, storePath } from "@/lib/store-context";
 import { formatCOP } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
@@ -81,7 +81,7 @@ export default function CartPanel({
     // El panel lateral se queda montado al navegar: sin esto taparía la
     // confirmación del pedido en pantallas grandes.
     closePanel();
-    router.push(`/pedido/${orderId}`);
+    router.push(storePath(store, `/pedido/${orderId}`));
   }
 
   if (!ready) {
@@ -103,7 +103,7 @@ export default function CartPanel({
           </button>
         ) : (
           <Link
-            href="/"
+            href={storePath(store)}
             className="mt-4 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
           >
             Ver productos

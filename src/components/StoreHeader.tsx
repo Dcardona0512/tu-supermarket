@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart";
-import { useStore } from "@/lib/store-context";
+import { useStore, storePath } from "@/lib/store-context";
 
 export default function StoreHeader() {
   const { totalItems, panelOpen, togglePanel } = useCart();
@@ -12,7 +12,7 @@ export default function StoreHeader() {
   return (
     <header className="sticky top-0 z-40 h-[var(--header-h)] border-b border-black/5 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={storePath(store)} className="flex items-center gap-2">
           {/* Con logo se usa la imagen; sin él, las iniciales sobre el color
               de la tienda. Nadie queda con un hueco por no tener uno. */}
           {store.logoUrl ? (
@@ -44,7 +44,7 @@ export default function StoreHeader() {
 
         {/* En el celular se abre la página del carrito... */}
         <Link
-          href="/carrito"
+          href={storePath(store, "/carrito")}
           className="relative inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark lg:hidden"
         >
           <CartIcon />

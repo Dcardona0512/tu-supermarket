@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
   setStorePublished,
   deleteInvite,
 } from "@/app/plataforma/actions";
+import { toSlug } from "@/lib/slug";
 
 type Store = {
   id: string;
@@ -48,8 +49,13 @@ export default function PlatformDashboard({
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
 
+  // El dominio se toma del navegador, no se escribe a mano
+  const [origen, setOrigen] = useState("");
+  useEffect(() => setOrigen(window.location.origin), []);
+
   const activas = stores.filter((s) => s.isPublished).length;
   const pendientes = invites.filter((i) => !i.usada && !i.vencida).length;
+  const previo = toSlug(enlace || nombre);
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -153,7 +159,7 @@ export default function PlatformDashboard({
             </div>
             <div className="min-w-40 flex-1">
               <label className="mb-1 block text-xs font-medium text-neutral-600">
-                Enlace (opcional)
+                Nombre corto (opcional)
               </label>
               <input
                 value={enlace}
@@ -162,6 +168,15 @@ export default function PlatformDashboard({
                 className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               />
             </div>
+            {/* Se muestra el enlace que va a quedar: es la única forma de no
+                equivocarse, porque el nombre corto no se puede cambiar después. */}
+            <p className="w-full text-xs text-neutral-500">
+              Su tienda quedará en{" "}
+              <code className="rounded bg-neutral-100 px-1.5 py-0.5">
+                {origen.replace(/^https?:\/\//, "") || "…"}/
+                <strong>{previo || "nombre-corto"}</strong>
+              </code>
+            </p>
             <button
               type="submit"
               disabled={creando}
@@ -189,10 +204,7 @@ export default function PlatformDashboard({
                 </button>
                 <button
                   onClick={() =>
-                    copiar(
-                      `https://tusupermarket.vercel.app/registro?codigo=${nuevoCodigo}`,
-                      "enlace"
-                    )
+                    copiar(`${origen}/registro?codigo=${nuevoCodigo}`, "enlace")
                   }
                   className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold"
                 >

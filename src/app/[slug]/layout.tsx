@@ -6,16 +6,12 @@ import { getStoreBySlug } from "@/lib/store";
 import { darken } from "@/lib/brand";
 import StoreShell from "@/components/StoreShell";
 
-/**
- * Transitorio: mientras la raíz siga siendo el catálogo, sirve la tienda de
- * demostración. Cuando `/` pase a ser la portada de la plataforma, estas
- * páginas se mueven a `/[slug]` y el slug saldrá de la propia URL.
- */
-const SLUG_POR_DEFECTO = "demo";
+type Params = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const store = await getStoreBySlug(SLUG_POR_DEFECTO);
-  if (!store) return {};
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { slug } = await params;
+  const store = await getStoreBySlug(slug);
+  if (!store) return { title: "Tienda no encontrada" };
 
   // La pestaña del navegador lleva el nombre del negocio, no el de la
   // plataforma: es la tienda del tendero, no la nuestra.
@@ -27,10 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function StoreLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  const store = await getStoreBySlug(SLUG_POR_DEFECTO);
+  params,
+}: Params & { children: React.ReactNode }) {
+  const { slug } = await params;
+  const store = await getStoreBySlug(slug);
+
+  // No existe, o está suspendida: 404 en vez de una página a medias.
   if (!store) notFound();
 
   return (

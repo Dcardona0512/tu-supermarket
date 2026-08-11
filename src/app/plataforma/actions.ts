@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { toSlug } from "@/lib/slug";
 
 type Result = { ok: boolean; error?: string };
 
@@ -30,16 +31,6 @@ async function requirePlatformAdmin() {
   return { supabase, user };
 }
 
-/** Convierte "Autoservicio La Esquina" en "autoservicio-la-esquina". */
-export async function slugify(texto: string): Promise<string> {
-  return texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-}
 
 /**
  * Crea un código de invitación con el nombre y el enlace ya reservados.
@@ -58,7 +49,7 @@ export async function createInvite(
     const nombre = storeName.trim();
     if (!nombre) return { ok: false, error: "El nombre es obligatorio" };
 
-    const enlace = await slugify(slug || storeName);
+    const enlace = toSlug(slug || storeName);
     if (enlace.length < 3) {
       return { ok: false, error: "El enlace debe tener al menos 3 caracteres" };
     }

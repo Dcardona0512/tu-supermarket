@@ -147,10 +147,8 @@ export default function AdminSidebar({
 
         {/* Pie: tienda, usuario y salir */}
         <div className="shrink-0 border-t border-black/5 p-2">
-          {/* Mientras la tienda pública siga en la raíz, esto apunta a "/".
-              Cuando cada tienda tenga su ruta pasa a ser `/${storeSlug}`. */}
           <Link
-            href="/"
+            href={`/${storeSlug}`}
             target="_blank"
             title="Ver tienda"
             onClick={close}

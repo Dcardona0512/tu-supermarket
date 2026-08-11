@@ -30,9 +30,9 @@ type OrderPublic = {
 export default async function OrderConfirmationPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { slug, id } = await params;
   const supabase = await createClient();
 
   const { data } = await supabase.rpc("get_order_public", { p_order_id: id });
@@ -98,7 +98,7 @@ export default async function OrderConfirmationPage({
 
       <div className="mt-5 text-center">
         <Link
-          href="/"
+          href={`/${slug}`}
           className="inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
         >
           Seguir comprando
