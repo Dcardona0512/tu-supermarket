@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { initials } from "@/lib/brand";
 
 /** Nombre de la herramienta, el mismo para todas las tiendas que la usan. */
 const PLATAFORMA = "TU SUPERMARKET";
@@ -34,6 +36,8 @@ export default function AdminSidebar({
   pendingOrders = 0,
   storeName,
   storeSlug,
+  storeLogoUrl = null,
+  storeBrandColor = "#1d4ed8",
   isPlatformAdmin = false,
 }: {
   user: string;
@@ -43,6 +47,10 @@ export default function AdminSidebar({
   storeName: string;
   /** Para que "Ver tienda" lleve a su enlace público. */
   storeSlug: string;
+  /** Logo de la tienda. Si no hay, se usan sus iniciales. */
+  storeLogoUrl?: string | null;
+  /** Color de la tienda, solo para el distintivo: el resto del panel no cambia. */
+  storeBrandColor?: string;
   /** Solo quien administra la plataforma ve el acceso a su panel. */
   isPlatformAdmin?: boolean;
 }) {
@@ -77,21 +85,34 @@ export default function AdminSidebar({
       >
         {/* Logo y botón de menú, ambos dentro del ancho de la franja */}
         <div className="flex h-14 shrink-0 items-center gap-1 border-b border-black/5 px-1.5">
-          {/* La marca es de la herramienta, no de la tienda: el tendero debe
-              saber qué sistema está usando. Su negocio va debajo. */}
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-black text-white">
-            TS
-          </span>
+          {/* El tendero entra a su propio panel: su negocio va primero, y la
+              herramienta firma debajo. El distintivo lleva su logo, o sus
+              iniciales sobre su color si todavía no ha subido ninguno. */}
+          {storeLogoUrl ? (
+            <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+              <Image
+                src={storeLogoUrl}
+                alt={storeName}
+                fill
+                sizes="32px"
+                className="object-cover"
+              />
+            </span>
+          ) : (
+            <span
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black text-white"
+              style={{ backgroundColor: storeBrandColor }}
+            >
+              {initials(storeName)}
+            </span>
+          )}
           {open && (
             <span className="ml-1 min-w-0 flex-1 leading-tight">
-              <span className="block truncate text-sm font-bold">
-                {PLATAFORMA}
-              </span>
-              <span
-                className="block truncate text-xs text-neutral-500"
-                title={storeName}
-              >
+              <span className="block truncate text-sm font-bold" title={storeName}>
                 {storeName}
+              </span>
+              <span className="block truncate text-xs text-neutral-500">
+                {PLATAFORMA}
               </span>
             </span>
           )}

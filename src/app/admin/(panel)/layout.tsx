@@ -22,7 +22,7 @@ export default async function PanelLayout({
   // Supabase sin darla de alta como tienda.
   const { data: store } = await supabase
     .from("stores")
-    .select("id, slug, name")
+    .select("id, slug, name, logo_url, brand_color")
     .eq("owner_id", user.id)
     .maybeSingle();
 
@@ -63,6 +63,8 @@ export default async function PanelLayout({
         pendingOrders={pendingOrders ?? 0}
         storeName={store.name}
         storeSlug={store.slug}
+        storeLogoUrl={store.logo_url}
+        storeBrandColor={store.brand_color}
         isPlatformAdmin={Boolean(esAdminPlataforma)}
       />
       {/* Espacio para la franja lateral de iconos */}
