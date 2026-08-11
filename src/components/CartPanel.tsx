@@ -97,14 +97,14 @@ export default function CartPanel({
         {onSeguirComprando ? (
           <button
             onClick={onSeguirComprando}
-            className="mt-4 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+            className="mt-4 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-text hover:bg-brand-dark"
           >
             Ver productos
           </button>
         ) : (
           <Link
             href={storePath(store)}
-            className="mt-4 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+            className="mt-4 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-text hover:bg-brand-dark"
           >
             Ver productos
           </Link>
@@ -239,7 +239,7 @@ export default function CartPanel({
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:bg-neutral-300"
+            className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-brand-text transition hover:bg-brand-dark disabled:bg-neutral-300"
           >
             {submitting ? "Enviando pedido..." : "Confirmar pedido"}
           </button>

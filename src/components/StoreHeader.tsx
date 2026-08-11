@@ -26,7 +26,7 @@ export default function StoreHeader() {
               />
             </span>
           ) : (
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand text-lg font-black text-white">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand text-lg font-black text-brand-text">
               {store.initials}
             </span>
           )}
@@ -45,7 +45,7 @@ export default function StoreHeader() {
         {/* En el celular se abre la página del carrito... */}
         <Link
           href={storePath(store, "/carrito")}
-          className="relative inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark lg:hidden"
+          className="relative inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-text transition hover:bg-brand-dark lg:hidden"
         >
           <CartIcon />
           <span className="hidden sm:inline">Carrito</span>
@@ -58,8 +58,8 @@ export default function StoreHeader() {
           aria-expanded={panelOpen}
           className={`relative hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition lg:inline-flex ${
             panelOpen
-              ? "bg-brand-dark text-white"
-              : "bg-brand text-white hover:bg-brand-dark"
+              ? "bg-brand-dark text-brand-text"
+              : "bg-brand text-brand-text hover:bg-brand-dark"
           }`}
         >
           <CartIcon />

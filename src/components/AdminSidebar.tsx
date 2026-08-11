@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { initials } from "@/lib/brand";
+import { initials, readableText } from "@/lib/brand";
 
 /** Nombre de la herramienta, el mismo para todas las tiendas que la usan. */
 const PLATAFORMA = "TU SUPERMARKET";
@@ -100,8 +100,11 @@ export default function AdminSidebar({
             </span>
           ) : (
             <span
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black text-white"
-              style={{ backgroundColor: storeBrandColor }}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-sm font-black"
+              style={{
+                backgroundColor: storeBrandColor,
+                color: readableText(storeBrandColor),
+              }}
             >
               {initials(storeName)}
             </span>

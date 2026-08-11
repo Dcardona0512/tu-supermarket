@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage, formatBytes, LOGO_SIDE } from "@/lib/image";
-import { initials, darken, PALETA } from "@/lib/brand";
+import { initials, darken, readableText, PALETA } from "@/lib/brand";
 import { formatCOP } from "@/lib/format";
 import { updateStore } from "@/app/admin/(panel)/tienda/actions";
 import type { StoreInfo } from "@/lib/store-context";
@@ -40,6 +40,7 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
   const [origen, setOrigen] = useState("");
   useEffect(() => setOrigen(window.location.origin), []);
 
+  const esDeLaPaleta = PALETA.some((c) => c.valor === brandColor);
   const enlaceCompleto = `${origen}/${store.slug}`;
   const enlaceVisible = origen
     ? `${origen.replace(/^https?:\/\//, "")}/${store.slug}`
@@ -134,8 +135,11 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
             </span>
           ) : (
             <span
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-lg font-black text-white"
-              style={{ backgroundColor: brandColor }}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-lg font-black"
+              style={{
+                backgroundColor: brandColor,
+                color: readableText(brandColor),
+              }}
             >
               {initials(name || "?")}
             </span>
@@ -151,8 +155,11 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
             )}
           </span>
           <span
-            className="ml-auto shrink-0 rounded-full px-4 py-2 text-sm font-semibold text-white"
-            style={{ backgroundColor: brandColor }}
+            className="ml-auto shrink-0 rounded-full px-4 py-2 text-sm font-semibold"
+            style={{
+              backgroundColor: brandColor,
+              color: readableText(brandColor),
+            }}
           >
             Carrito
           </span>
@@ -219,7 +226,7 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
             <label className="mb-2 block text-xs font-medium text-neutral-600">
               Color
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {PALETA.map((c) => (
                 <button
                   key={c.valor}
@@ -236,10 +243,40 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
                   style={{ backgroundColor: c.valor }}
                 />
               ))}
+
+              {/* El pincel: cualquier color, no solo los de la fila. Los de
+                  arriba son atajos para quien no tiene un color de marca. */}
+              <label
+                title="Elegir otro color"
+                className={`relative grid h-9 w-9 cursor-pointer place-items-center rounded-lg border-2 border-dashed border-neutral-300 text-neutral-500 transition hover:border-neutral-400 ${
+                  esDeLaPaleta ? "" : "ring-2 ring-neutral-900 ring-offset-2"
+                }`}
+                style={
+                  esDeLaPaleta
+                    ? undefined
+                    : { backgroundColor: brandColor, borderStyle: "solid" }
+                }
+              >
+                <BrushIcon
+                  color={esDeLaPaleta ? "currentColor" : readableText(brandColor)}
+                />
+                <input
+                  type="color"
+                  value={brandColor}
+                  onChange={(e) => setBrandColor(e.target.value)}
+                  aria-label="Elegir otro color"
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                />
+              </label>
+
+              <code className="rounded bg-neutral-100 px-2 py-1 text-xs uppercase text-neutral-600">
+                {brandColor}
+              </code>
             </div>
             <p className="mt-2 text-xs text-neutral-400">
-              Los botones de tu tienda usarán este color, y un tono más oscuro
-              ({darken(brandColor)}) al pasar el dedo o el ratón por encima.
+              Los botones de tu tienda usarán este color, con un tono más oscuro
+              al pasar por encima. Si eliges un color claro, el texto de los
+              botones pasa a oscuro para que se siga leyendo.
             </p>
           </div>
 
@@ -344,6 +381,26 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
         </button>
       </form>
     </div>
+  );
+}
+
+/** Pincel del selector de color libre. */
+function BrushIcon({ color }: { color: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18.4 3.6a2.1 2.1 0 0 1 3 3L12 16l-4 1 1-4Z" />
+      <path d="M5 21c1.5-1.5 2-4 1-5s-3.5-.5-5 1c1 0 2 .5 2 2s.5 2 2 2Z" />
+    </svg>
   );
 }
 

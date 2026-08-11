@@ -5,6 +5,10 @@
   --foreground: #14181f;
   --brand: #1d4ed8;
   --brand-dark: #1e3a8a;
+  /* Color del texto que va encima del color de marca. Es blanco casi siempre,
+     pero una tienda que elija un amarillo o un verde lima necesita texto
+     oscuro para que sus botones se puedan leer. Lo calcula `readableText`. */
+  --brand-text: #ffffff;
   /* Alto de la barra superior de la tienda (contenido + borde inferior).
      El panel del carrito arranca justo debajo para no tapar el botón. */
   --header-h: 3.8125rem;
@@ -15,6 +19,7 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-brand-text: var(--brand-text);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 

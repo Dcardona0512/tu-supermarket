@@ -66,12 +66,12 @@ export function darken(hex: string, amount = 0.22): string {
 }
 
 /**
- * Colores que puede elegir una tienda.
+ * Colores sugeridos.
  *
- * Es una lista cerrada y no un selector libre a propósito: toda la interfaz
- * escribe en blanco sobre el color de marca, así que un amarillo o un verde lima
- * dejarían los botones ilegibles. Todos estos tonos pasan el contraste 4.5:1
- * contra blanco, comprobado con `readableText`.
+ * Son atajos para quien no tiene un color de marca definido, no una lista
+ * cerrada: junto a ellos hay un selector libre. Lo que antes obligaba a cerrar
+ * la lista era que la interfaz escribía siempre en blanco; ahora el color del
+ * texto se decide con `readableText`, así que un amarillo también funciona.
  */
 export const PALETA = [
   { valor: "#1d4ed8", nombre: "Azul" },
@@ -88,9 +88,9 @@ export const PALETA = [
 /**
  * Si sobre este color hay que escribir en blanco o en negro.
  *
- * Sirve para validar la paleta de arriba: si algún día se permite un color
- * libre, esto evita que los botones queden ilegibles. Usa la luminancia
- * relativa de la WCAG.
+ * Es lo que permite dejar elegir cualquier color sin que los botones queden
+ * ilegibles: un azul oscuro lleva texto blanco, un amarillo lo lleva negro. Usa
+ * la luminancia relativa de la WCAG.
  */
 export function readableText(hex: string): "#ffffff" | "#111111" {
   const [r, g, b] = toRgb(hex).map((c) => {

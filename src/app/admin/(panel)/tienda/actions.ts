@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { requireStore } from "@/lib/store";
-import { PALETA } from "@/lib/brand";
 
 export type StoreSettingsInput = {
   name: string;
@@ -33,11 +32,12 @@ export async function updateStore(
       return { ok: false, error: "El nombre no puede pasar de 60 caracteres" };
     }
 
-    // El color llega de una lista de botones, pero se comprueba igual: el
-    // formulario del navegador se puede manipular.
-    const permitido = PALETA.some((c) => c.valor === input.brandColor);
-    if (!permitido) {
-      return { ok: false, error: "Ese color no está entre los disponibles" };
+    // Cualquier color vale, pero tiene que ser un hexadecimal de verdad: la
+    // base lo exige con un check y el valor entra en una variable CSS, así que
+    // un texto arbitrario aquí rompería el estilo de toda la tienda.
+    const color = input.brandColor.trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/.test(color)) {
+      return { ok: false, error: "El color no es válido" };
     }
 
     if (!Number.isFinite(input.deliveryFee) || input.deliveryFee < 0) {
@@ -49,7 +49,7 @@ export async function updateStore(
       .update({
         name,
         tagline: input.tagline.trim() || null,
-        brand_color: input.brandColor,
+        brand_color: color,
         logo_url: input.logoUrl,
         phone: input.phone.trim() || null,
         address: input.address.trim() || null,

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CartProvider } from "@/lib/cart";
 import { StoreProvider } from "@/lib/store-context";
 import { getStoreBySlug } from "@/lib/store";
-import { darken } from "@/lib/brand";
+import { darken, readableText } from "@/lib/brand";
 import StoreShell from "@/components/StoreShell";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -42,6 +42,9 @@ export default async function StoreLayout({
             {
               "--brand": store.brandColor,
               "--brand-dark": darken(store.brandColor),
+              // Si la tienda eligió un color claro, el texto encima pasa a
+              // oscuro: si no, sus botones serían ilegibles.
+              "--brand-text": readableText(store.brandColor),
             } as React.CSSProperties
           }
         >

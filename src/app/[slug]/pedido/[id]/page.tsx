@@ -99,7 +99,7 @@ export default async function OrderConfirmationPage({
       <div className="mt-5 text-center">
         <Link
           href={`/${slug}`}
-          className="inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+          className="inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-text hover:bg-brand-dark"
         >
           Seguir comprando
         </Link>

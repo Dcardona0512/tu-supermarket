@@ -104,7 +104,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <button
           onClick={handleAdd}
           disabled={outOfStock}
-          className="mt-3 w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-neutral-300"
+          className="mt-3 w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-brand-text transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:bg-neutral-300"
         >
           {outOfStock ? "Sin stock" : added ? "¡Agregado!" : "Agregar"}
         </button>

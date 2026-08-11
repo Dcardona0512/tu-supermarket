@@ -139,7 +139,7 @@ function CategoryChip({
       onClick={onClick}
       className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
         active
-          ? "bg-brand text-white"
+          ? "bg-brand text-brand-text"
           : "bg-white text-neutral-600 hover:bg-neutral-100"
       }`}
     >
