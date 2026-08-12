@@ -42,7 +42,7 @@ export default function CanjearCodigo({ correo }: { correo: string }) {
   async function salir() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   }
 

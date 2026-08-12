@@ -17,5 +17,5 @@ import { redirect } from "next/navigation";
  * Cuando exista una portada de la plataforma, esto se reemplaza por ella.
  */
 export default function RootPage() {
-  redirect("/admin/login");
+  redirect("/login");
 }

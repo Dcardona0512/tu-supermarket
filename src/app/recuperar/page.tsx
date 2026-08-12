@@ -28,7 +28,7 @@ export default function RecuperarPage() {
       {
         // La ruta canjea el enlace, abre la sesión y lo deja en la pantalla
         // donde escribe la contraseña nueva.
-        redirectTo: `${window.location.origin}/auth/confirmar?next=/admin/clave`,
+        redirectTo: `${window.location.origin}/auth/confirmar?next=/clave`,
       }
     );
 
@@ -59,7 +59,7 @@ export default function RecuperarPage() {
           Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
         </p>
         <Link
-          href="/admin/login"
+          href="/login"
           className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
         >
           Volver al acceso
@@ -107,7 +107,7 @@ export default function RecuperarPage() {
         </button>
 
         <p className="text-center text-xs text-neutral-500">
-          <Link href="/admin/login" className="font-medium text-brand-ink">
+          <Link href="/login" className="font-medium text-brand-ink">
             Volver al acceso
           </Link>
         </p>

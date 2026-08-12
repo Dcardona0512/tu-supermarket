@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     if (error) return alAcceso(origin, traducir(error.message));
 
     if (type === "recovery") {
-      return NextResponse.redirect(`${origin}${pedido ?? "/admin/clave"}`);
+      return NextResponse.redirect(`${origin}${pedido ?? "/clave"}`);
     }
 
     // Cuenta confirmada: se cierra la sesión y entra él con sus credenciales.
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
  * formulario de otro color.
  */
 function alAcceso(origin: string, motivo: string | null, bandera?: string) {
-  const url = new URL("/admin/login", origin);
+  const url = new URL("/login", origin);
   if (motivo) url.searchParams.set("aviso", motivo);
   if (bandera) url.searchParams.set(bandera, "1");
   return NextResponse.redirect(url);

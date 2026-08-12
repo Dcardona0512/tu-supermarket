@@ -73,7 +73,7 @@ export default function ClavePage() {
           Los enlaces de recuperación sirven una sola vez. Pide uno nuevo.
         </p>
         <Link
-          href="/admin/recuperar"
+          href="/recuperar"
           className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-text transition hover:bg-brand-dark"
         >
           Pedir otro enlace

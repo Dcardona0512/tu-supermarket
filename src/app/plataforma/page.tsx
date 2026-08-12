@@ -11,7 +11,7 @@ export default async function PlatformPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/admin/login");
+  if (!user) redirect("/login");
 
   const { data: esAdmin } = await supabase
     .from("platform_admins")

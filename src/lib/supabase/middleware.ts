@@ -31,26 +31,22 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAdminArea =
+
+  // Las pantallas de acceso viven fuera de `/admin`, así que la zona protegida
+  // es todo lo que cuelga de ahí sin excepciones que recordar.
+  const esZonaPrivada =
     path.startsWith("/admin") || path.startsWith("/plataforma");
-  const isLoginPage = path === "/admin/login";
+  const esAcceso = path === "/login";
 
-  // Cuelgan de `/admin` pero son justo para quien no puede entrar. `/admin/clave`
-  // se deja pasar sin sesión a propósito: así explica que el enlace ya se usó,
-  // en vez de rebotar al acceso sin decir por qué. Sin sesión no puede cambiar
-  // ninguna contraseña.
-  const esPublica =
-    isLoginPage || path === "/admin/recuperar" || path === "/admin/clave";
-
-  // Proteger el dashboard: sin sesión -> login
-  if (isAdminArea && !esPublica && !user) {
+  // Sin sesión no se entra al panel
+  if (esZonaPrivada && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Si ya hay sesión y visita el login, enviarlo al dashboard
-  if (isLoginPage && user) {
+  // Y con la sesión ya abierta no tiene sentido volver a pedirla
+  if (esAcceso && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     return NextResponse.redirect(url);

@@ -82,7 +82,7 @@ export default function RegistroForm() {
           Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
         </p>
         <Link
-          href="/admin/login"
+          href="/login"
           className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
         >
           Ir al acceso
@@ -179,7 +179,7 @@ export default function RegistroForm() {
 
         <p className="text-center text-xs text-neutral-500">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/admin/login" className="font-medium text-brand-ink">
+          <Link href="/login" className="font-medium text-brand-ink">
             Entra aquí
           </Link>
         </p>

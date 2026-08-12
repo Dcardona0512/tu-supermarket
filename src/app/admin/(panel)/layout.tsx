@@ -17,7 +17,7 @@ export default async function PanelLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/admin/login");
+  if (!user) redirect("/login");
 
   const { data: store } = await supabase
     .from("stores")

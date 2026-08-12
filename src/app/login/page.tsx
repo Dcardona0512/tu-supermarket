@@ -96,7 +96,7 @@ function LoginForm() {
                 Contraseña
               </label>
               <Link
-                href="/admin/recuperar"
+                href="/recuperar"
                 className="text-xs font-medium text-brand-ink hover:underline"
               >
                 ¿La olvidaste?

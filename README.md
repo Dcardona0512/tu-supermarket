@@ -9,12 +9,13 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | Ruta | Quién la usa |
 | --- | --- |
 | `/` | nadie en particular: redirige al acceso. Es también donde cae Supabase cuando no puede usar el destino que pide la aplicación |
+| `/login` | la entrada al panel. Cuelga de la raíz, no de `/admin`, porque es el enlace que se le pasa al tendero |
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
 | `/plataforma` | la administración de la plataforma: alta y suspensión de tiendas |
 | `/registro` | alta de una tienda con código de invitación, o canje del código si entró con un proveedor |
-| `/admin/recuperar` | pedir el enlace para poner otra contraseña |
-| `/admin/clave` | escribir la contraseña nueva |
+| `/recuperar` | pedir el enlace para poner otra contraseña |
+| `/clave` | escribir la contraseña nueva |
 | `/auth/confirmar` | aterrizaje de los correos y de Google, Facebook y Apple |
 
 ## Cambiar el dominio
@@ -139,7 +140,7 @@ blanco.
 | --- | --- | --- |
 | Correo y contraseña | el código de invitación, escrito en `/registro` | el acceso, a escribir sus credenciales |
 | Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar | su panel |
-| Recuperar contraseña | `/admin/recuperar` le manda un enlace a su correo | la pantalla de la contraseña nueva |
+| Recuperar contraseña | `/recuperar` le manda un enlace a su correo | la pantalla de la contraseña nueva |
 
 Los tres destinos son distintos a propósito:
 
@@ -238,7 +239,7 @@ En *Authentication*, una sola vez por proyecto:
    ```
 
    El `**` del final hace falta porque el enlace de recuperación lleva
-   `?next=/admin/clave`. Sin estas entradas Supabase ignora el destino que manda
+   `?next=/clave`. Sin estas entradas Supabase ignora el destino que manda
    la aplicación y devuelve al Site URL — o sea, a localhost si el paso 1 sigue
    sin hacerse.
 3. **Email Templates → Confirm signup:**
@@ -257,7 +258,7 @@ En *Authentication*, una sola vez por proyecto:
    </a>
    ```
 
-   Ojo al `&` en vez de `?`: esa dirección ya lleva `?next=/admin/clave`. Si se
+   Ojo al `&` en vez de `?`: esa dirección ya lleva `?next=/clave`. Si se
    escribe de la otra forma también funciona, porque la ruta deduce el destino
    del `type=recovery`.
 
