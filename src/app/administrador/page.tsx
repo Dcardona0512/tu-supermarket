@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/format";
-import PlatformDashboard from "@/components/PlatformDashboard";
+import AdminPanel from "@/components/AdminPanel";
 
 export const dynamic = "force-dynamic";
 
-export default async function PlatformPage() {
+export default async function AdministradorPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,8 +19,8 @@ export default async function PlatformPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Una tienda cualquiera que teclee /plataforma va a su propio panel: no tiene
-  // por qué saber que esta pantalla existe.
+  // Una tienda cualquiera que teclee /administrador va a su propio panel: no
+  // tiene por qué saber que esta pantalla existe.
   if (!esAdmin) redirect("/admin");
 
   const [{ data: stores }, { data: invites }] = await Promise.all([
@@ -35,7 +35,7 @@ export default async function PlatformPage() {
   ]);
 
   return (
-    <PlatformDashboard
+    <AdminPanel
       stores={(stores ?? []).map((s) => ({
         id: s.id,
         slug: s.slug,

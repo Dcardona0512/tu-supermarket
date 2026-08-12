@@ -12,7 +12,7 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/login` | la entrada al panel. Cuelga de la raíz, no de `/admin`, porque es el enlace que se le pasa al tendero |
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
-| `/plataforma` | la administración de la plataforma: alta y suspensión de tiendas |
+| `/administrador` | tu administración: alta y suspensión de tiendas. Separada del panel de tienda |
 | `/registro` | alta de una tienda con código de invitación, o canje del código si entró con un proveedor |
 | `/recuperar` | pedir el enlace para poner otra contraseña |
 | `/clave` | escribir la contraseña nueva |
@@ -112,7 +112,7 @@ Abre http://localhost:3000
 
 No hay registro abierto: nadie entra sin permiso.
 
-1. En `/plataforma`, generar un código de invitación con el nombre de la tienda y
+1. En `/administrador`, generar un código de invitación con el nombre de la tienda y
    su nombre corto, que es el que quedará en la URL y **no se puede cambiar
    después**. El formulario muestra el enlace resultante mientras se escribe.
 2. Si sabes su correo, escribirlo ahí también. No es obligatorio, pero es lo que

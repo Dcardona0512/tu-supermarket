@@ -38,7 +38,6 @@ export default function AdminSidebar({
   storeSlug,
   storeLogoUrl = null,
   storeBrandColor = "#1d4ed8",
-  isPlatformAdmin = false,
 }: {
   user: string;
   /** Pedidos en línea sin atender, para avisar en el menú. */
@@ -51,8 +50,6 @@ export default function AdminSidebar({
   storeLogoUrl?: string | null;
   /** Color de la tienda, solo para el distintivo: el resto del panel no cambia. */
   storeBrandColor?: string;
-  /** Solo quien administra la plataforma ve el acceso a su panel. */
-  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -186,23 +183,9 @@ export default function AdminSidebar({
             {open && <span className="truncate">Ver tienda</span>}
           </Link>
 
-          {/* Solo para quien administra la plataforma; una tienda cualquiera no
-              sabe que esta pantalla existe. */}
-          {isPlatformAdmin && (
-            <Link
-              href="/plataforma"
-              title="Administrar plataforma"
-              onClick={close}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 ${
-                open ? "" : "justify-center px-0"
-              }`}
-            >
-              <span className="shrink-0">
-                <IconShield />
-              </span>
-              {open && <span className="truncate">Plataforma</span>}
-            </Link>
-          )}
+          {/* Aquí había un atajo a la administración de la plataforma. Se quitó
+              al separar las dos: este panel es de la tienda y nada más, y quien
+              administra la plataforma no atiende ninguna tienda. */}
 
           {open && (
             <p className="truncate px-3 pt-2 text-xs text-neutral-400">
@@ -310,15 +293,6 @@ function IconStore() {
     <svg {...svgProps()}>
       <path d="M4 9h16v11H4zM3 9l1.5-5h15L21 9" />
       <path d="M9 20v-6h6v6" />
-    </svg>
-  );
-}
-
-/** Escudo: administración de la plataforma. */
-function IconShield() {
-  return (
-    <svg {...svgProps()}>
-      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z" />
     </svg>
   );
 }

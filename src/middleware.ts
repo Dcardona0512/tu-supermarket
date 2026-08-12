@@ -15,10 +15,10 @@ export const config = {
   //     canje del código, y con el token vencido se le mostraría el formulario
   //     de alta como si no hubiera entrado.
   //
-  // El bloqueo solo mira `/admin` y `/plataforma`; las demás se abren sin sesión.
+  // El bloqueo solo mira `/admin` y `/administrador`; las demás se abren sin sesión.
   matcher: [
     "/admin/:path*",
-    "/plataforma/:path*",
+    "/administrador/:path*",
     "/login",
     "/clave",
     "/registro",

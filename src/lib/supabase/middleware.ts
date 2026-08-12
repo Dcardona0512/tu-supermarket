@@ -34,8 +34,13 @@ export async function updateSession(request: NextRequest) {
 
   // Las pantallas de acceso viven fuera de `/admin`, así que la zona protegida
   // es todo lo que cuelga de ahí sin excepciones que recordar.
-  const esZonaPrivada =
-    path.startsWith("/admin") || path.startsWith("/plataforma");
+  //
+  // Los dos paneles se comparan con la barra incluida: a secas, `/admin` es
+  // prefijo de `/administrador` y cualquier regla para uno alcanzaría al otro.
+  const esPanelDeTienda = path === "/admin" || path.startsWith("/admin/");
+  const esPanelDeAdmin =
+    path === "/administrador" || path.startsWith("/administrador/");
+  const esZonaPrivada = esPanelDeTienda || esPanelDeAdmin;
   const esAcceso = path === "/login";
 
   // Sin sesión no se entra al panel

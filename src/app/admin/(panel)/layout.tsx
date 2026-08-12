@@ -19,6 +19,16 @@ export default async function PanelLayout({
 
   if (!user) redirect("/login");
 
+  // Las dos administraciones están separadas: quien administra la plataforma no
+  // atiende ninguna tienda, así que este panel no es el suyo y se va al suyo.
+  const { data: esAdminPlataforma } = await supabase
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (esAdminPlataforma) redirect("/administrador");
+
   const { data: store } = await supabase
     .from("stores")
     .select("id, slug, name, logo_url, brand_color")
@@ -32,19 +42,11 @@ export default async function PanelLayout({
 
   // Pedidos web sin atender: se muestran como aviso en el menú. Las políticas
   // ya lo limitan a esta tienda.
-  const [{ count: pendingOrders }, { data: esAdminPlataforma }] =
-    await Promise.all([
-      supabase
-        .from("orders")
-        .select("*", { count: "exact", head: true })
-        .eq("channel", "linea")
-        .eq("status", "pendiente"),
-      supabase
-        .from("platform_admins")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
+  const { count: pendingOrders } = await supabase
+    .from("orders")
+    .select("*", { count: "exact", head: true })
+    .eq("channel", "linea")
+    .eq("status", "pendiente");
 
   return (
     // El panel toma el color de la tienda, igual que su escaparate: el tendero
@@ -68,7 +70,6 @@ export default async function PanelLayout({
         storeSlug={store.slug}
         storeLogoUrl={store.logo_url}
         storeBrandColor={store.brand_color}
-        isPlatformAdmin={Boolean(esAdminPlataforma)}
       />
       {/* Espacio para la franja lateral de iconos */}
       <div className="pl-20">

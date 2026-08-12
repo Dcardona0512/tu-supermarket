@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   createInvite,
   setStorePublished,
   deleteInvite,
-} from "@/app/plataforma/actions";
+} from "@/app/administrador/actions";
 import { toSlug } from "@/lib/slug";
 
 type Store = {
@@ -36,7 +36,7 @@ type Invite = {
  * Solo muestra el estado de cada tienda, no sus datos de negocio: para dar de
  * alta y suspender no hace falta ver los productos ni los pedidos de nadie.
  */
-export default function PlatformDashboard({
+export default function AdminPanel({
   stores,
   invites,
 }: {
@@ -98,6 +98,13 @@ export default function PlatformDashboard({
     router.refresh();
   }
 
+  async function salir() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   function copiar(texto: string, marca: string) {
     void navigator.clipboard?.writeText(texto);
     setCopiado(marca);
@@ -113,16 +120,16 @@ export default function PlatformDashboard({
           </span>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="text-sm font-bold">TU SUPERMARKET</p>
-            <p className="text-xs text-neutral-500">
-              Administración de la plataforma
-            </p>
+            <p className="text-xs text-neutral-500">Administrador</p>
           </div>
-          <Link
-            href="/admin"
+          {/* Aquí había un atajo a "Mi tienda". Se quitó al separar las dos
+              administraciones: desde aquí no se atiende ninguna tienda. */}
+          <button
+            onClick={salir}
             className="rounded-lg border border-black/10 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
           >
-            Mi tienda
-          </Link>
+            Salir
+          </button>
         </div>
       </header>
 
