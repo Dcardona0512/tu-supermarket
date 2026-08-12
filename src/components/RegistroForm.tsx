@@ -38,9 +38,15 @@ export default function RegistroForm() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
-      // La base lee el código de aquí para validar la invitación y crear la
-      // tienda en la misma operación.
-      options: { data: { invite_code: codigo.trim().toUpperCase() } },
+      options: {
+        // La base lee el código de aquí para validar la invitación y crear la
+        // tienda en la misma operación.
+        data: { invite_code: codigo.trim().toUpperCase() },
+        // A dónde vuelve el tendero al pulsar el enlace del correo. Se toma del
+        // navegador y no de una constante para que funcione igual en local, en
+        // una vista previa y en producción.
+        emailRedirectTo: `${window.location.origin}/auth/confirmar`,
+      },
     });
 
     setLoading(false);
@@ -66,7 +72,7 @@ export default function RegistroForm() {
         <h1 className="text-lg font-bold">Ya casi</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Te enviamos un correo a <strong>{email}</strong> para confirmar tu
-          cuenta. Ábrelo y luego entra al panel.
+          cuenta. Ábrelo y el enlace te lleva directo a tu panel.
         </p>
         <p className="mt-2 text-xs text-neutral-500">
           Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
@@ -169,7 +175,7 @@ export default function RegistroForm() {
 
         <p className="text-center text-xs text-neutral-500">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/admin/login" className="font-medium text-brand-dark">
+          <Link href="/admin/login" className="font-medium text-brand-ink">
             Entra aquí
           </Link>
         </p>

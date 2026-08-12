@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toLoginEmail } from "@/lib/admin-user";
 
 export default function AdminLoginPage() {
+  // El formulario lee la dirección para mostrar el aviso que puede dejar el
+  // enlace del correo, y eso obliga a envolverlo.
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  // Lo deja `/auth/confirmar` cuando el enlace del correo ya venció o se usó
+  const aviso = params.get("aviso");
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +57,12 @@ export default function AdminLoginPage() {
           <h1 className="mt-3 text-lg font-bold">Panel de administración</h1>
           <p className="text-sm tracking-wide text-neutral-500">TU SUPERMARKET</p>
         </div>
+
+        {aviso && !error && (
+          <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            {aviso} Entra con tu correo y contraseña.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

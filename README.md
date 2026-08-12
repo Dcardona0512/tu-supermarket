@@ -50,6 +50,34 @@ que relacione cada dominio con su tienda.
 - Punto de venta (POS) con lector de código de barras.
 - Entradas de inventario, informes de ventas y cierre de caja.
 - Gestión de pedidos: detalle del cliente y cambio de estado (pendiente → entregado / cancelado).
+- **Personalizar tienda**: nombre, frase, logo, color, teléfono, dirección y valor del domicilio, con vista previa en vivo.
+
+## La marca de cada tienda
+
+El tendero elige **un** color y con eso se pinta todo: su catálogo, su panel y el
+icono de la pestaña. La marca de la plataforma (TU SUPERMARKET) sigue en el texto
+del menú, no en el color.
+
+Como el color es libre —hay una paleta sugerida y también un pincel—, no se puede
+dar por hecho que encima va texto blanco. De un solo color se derivan cuatro, en
+[`src/lib/brand.ts`](src/lib/brand.ts), y entran como variables CSS:
+
+| Variable | Para qué | Cómo sale |
+| --- | --- | --- |
+| `--brand` | fondos de botón, cabecera, chips activos | tal cual lo eligió |
+| `--brand-dark` | el `hover` de esos botones | 22% más oscuro |
+| `--brand-text` | el texto **encima** del color | blanco o casi negro, por luminancia |
+| `--brand-ink` | el texto **del** color sobre fondo claro | se oscurece hasta llegar a 4.5:1 sobre blanco |
+
+Los dos últimos son los que permiten dejar elegir un amarillo sin que queden
+botones ni precios ilegibles. Se inyectan en dos sitios —el escaparate y el
+panel—, así que ningún componente necesita saber de qué tienda es.
+
+El **icono de la pestaña** lo genera `/[slug]/icono`: si la tienda subió logo, se
+usa el logo; si no, sus iniciales sobre su color. La dirección lleva `?v=` con la
+fecha de la última modificación de la tienda, porque el icono se sirve con caché
+de un año: sin ese número, cambiar el color no cambiaría nada en el navegador del
+cliente.
 
 ## Tecnologías
 
@@ -92,6 +120,39 @@ y caduca a los 30 días.
 Para dar de alta a un administrador de la plataforma hace falta una sentencia SQL
 sobre `platform_admins` — deliberadamente, para que nadie pueda ascenderse desde
 la aplicación.
+
+## Correo de confirmación
+
+Al registrarse, el tendero recibe un correo y su enlace lo tiene que dejar
+**dentro de su panel**, no en una página en blanco. Eso lo resuelve
+`/auth/confirmar`, que canjea el enlace, abre la sesión y lo manda a `/admin`. Si
+el enlace venció o ya se usó, cae en el acceso con el motivo en español.
+
+Hay que dejar tres cosas puestas en el panel de Supabase (*Authentication*), una
+sola vez por proyecto:
+
+1. **URL Configuration → Site URL:** el dominio de producción.
+2. **URL Configuration → Redirect URLs:** añadir `https://EL-DOMINIO/auth/confirmar`
+   y, para poder probar en local, `http://localhost:3000/auth/confirmar`. Sin
+   esto Supabase ignora el destino y devuelve al Site URL.
+3. **Email Templates → Confirm signup:** cambiar el cuerpo por un enlace con
+   `TokenHash`:
+
+   ```html
+   <a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email">
+     Confirmar mi cuenta
+   </a>
+   ```
+
+El paso 3 importa más de lo que parece. La plantilla de fábrica manda un enlace
+del flujo PKCE, cuyo verificador vive en las cookies del navegador donde se hizo
+el registro: si el tendero se registra en el computador de la tienda y abre el
+correo en el celular, el enlace falla. Con `TokenHash` la validación es entera
+del servidor y funciona desde cualquier equipo. La ruta acepta las dos formas, así
+que nada se rompe mientras la plantilla siga sin cambiar.
+
+Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
+correos por hora y suele caer en no deseado.
 
 ## Catálogo de ejemplo
 
