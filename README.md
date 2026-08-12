@@ -11,7 +11,10 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
 | `/plataforma` | la administración de la plataforma: alta y suspensión de tiendas |
-| `/registro` | alta de una tienda con código de invitación |
+| `/registro` | alta de una tienda con código de invitación, o canje del código si entró con un proveedor |
+| `/admin/recuperar` | pedir el enlace para poner otra contraseña |
+| `/admin/clave` | escribir la contraseña nueva |
+| `/auth/confirmar` | aterrizaje de los correos y de Google, Facebook y Apple |
 
 ## Cambiar el dominio
 
@@ -109,9 +112,11 @@ No hay registro abierto: nadie entra sin permiso.
 1. En `/plataforma`, generar un código de invitación con el nombre de la tienda y
    su nombre corto, que es el que quedará en la URL y **no se puede cambiar
    después**. El formulario muestra el enlace resultante mientras se escribe.
-2. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
-3. Él se registra con **su propio correo y la contraseña que elija**. La
-   plataforma nunca conoce esa contraseña.
+2. Si sabes su correo, escribirlo ahí también. No es obligatorio, pero es lo que
+   le permite entrar con Google, Facebook o Apple sin escribir el código.
+3. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
+4. Él entra con **su propio correo y la contraseña que elija**, o con el
+   proveedor que prefiera. La plataforma nunca conoce esa contraseña.
 
 El código lo valida la base de datos al crear la cuenta: si no sirve, el alta se
 aborta entera y no queda ningún usuario a medias. Cada código sirve una sola vez
@@ -121,38 +126,112 @@ Para dar de alta a un administrador de la plataforma hace falta una sentencia SQ
 sobre `platform_admins` — deliberadamente, para que nadie pueda ascenderse desde
 la aplicación.
 
-## Correo de confirmación
+## Formas de entrar
 
-Al registrarse, el tendero recibe un correo y su enlace lo tiene que dejar
-**dentro de su panel**, no en una página en blanco. Eso lo resuelve
-`/auth/confirmar`, que canjea el enlace, abre la sesión y lo manda a `/admin`. Si
-el enlace venció o ya se usó, cae en el acceso con el motivo en español.
+El tendero puede entrar de tres maneras, y **todas terminan en el mismo sitio**:
+`/auth/confirmar`, que canjea el enlace o el código del proveedor, abre la sesión
+y lo deja en `/admin`. Si algo falla, cae en el acceso con el motivo en español,
+nunca en una página en blanco.
 
-Hay que dejar tres cosas puestas en el panel de Supabase (*Authentication*), una
-sola vez por proyecto:
+| Forma | Qué necesita |
+| --- | --- |
+| Correo y contraseña | el código de invitación, escrito en `/registro` |
+| Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar |
+| Recuperar contraseña | `/admin/recuperar` le manda un enlace a su correo |
+
+### Quién termina con tienda
+
+Con Google, Facebook o Apple **no se puede mandar el código en el registro**: la
+aplicación se va al proveedor y vuelve con una cuenta ya creada, sin datos
+nuestros. Así que el control lo hace la base de datos de dos formas:
+
+- **Si reservaste su correo** al crear la invitación, quien entre con ese correo
+  recibe su tienda al instante, sin escribir nada. Es el camino cómodo y el
+  recomendado: tú ya sabes cuál es su correo cuando lo invitas.
+- **Si no**, la cuenta queda **sin tienda** y la aplicación le pide el código en
+  `/registro`, que lo canjea con `canjear_invitacion`.
+
+Una cuenta sin tienda no ve nada: todas las políticas cuelgan de `store_id`. Con
+los proveedores habilitados, cualquiera con un Gmail puede crear una cuenta
+vacía; no accede a nada, pero es la contrapartida de ofrecer ese botón.
+
+### Habilitar Google, Facebook y Apple
+
+Los botones **se muestran solos** en cuanto habilites cada proveedor: la
+aplicación le pregunta a Supabase cuáles están activos, así que no hay que
+desplegar nada ni tocar ninguna variable. Mientras no lo estén, no aparecen — un
+botón que no funciona lleva al tendero a un error en crudo del dominio de
+Supabase.
+
+Cada proveedor exige crear una aplicación en su consola y pegar en Supabase el
+*Client ID* y el *Client Secret*, en *Authentication → Sign In / Providers*. Eso
+lo tienes que hacer tú: son credenciales tuyas y no deben pasar por el código.
+
+- **Google** — en Google Cloud Console, *APIs & Services → Credentials → OAuth
+  client ID*, tipo *Web application*. Gratis.
+- **Facebook** — en Meta for Developers, una app tipo *Consumer* con el producto
+  *Facebook Login*. Gratis, pero para salir del modo desarrollo pide política de
+  privacidad publicada.
+- **Apple** — exige **cuenta de desarrollador de Apple de pago** (99 USD al año).
+  Si no la tienes, deja el proveedor sin habilitar y su botón simplemente no
+  aparece; el resto sigue funcionando.
+
+En los tres hay que pegar como *Redirect URI* la que muestra Supabase en la
+pantalla del proveedor:
+
+```
+https://EL-PROYECTO.supabase.co/auth/v1/callback
+```
+
+### Ajustes de Supabase que hay que dejar puestos
+
+En *Authentication*, una sola vez por proyecto:
 
 1. **URL Configuration → Site URL:** el dominio de producción.
-2. **URL Configuration → Redirect URLs:** añadir `https://EL-DOMINIO/auth/confirmar`
-   y, para poder probar en local, `http://localhost:3000/auth/confirmar`. Sin
-   esto Supabase ignora el destino y devuelve al Site URL.
-3. **Email Templates → Confirm signup:** cambiar el cuerpo por un enlace con
-   `TokenHash`:
+2. **URL Configuration → Redirect URLs:** añadir
+
+   ```
+   https://EL-DOMINIO/auth/confirmar**
+   http://localhost:3000/auth/confirmar**
+   ```
+
+   El `**` del final hace falta porque el enlace de recuperación lleva
+   `?next=/admin/clave`. Sin estas entradas Supabase ignora el destino y devuelve
+   al Site URL.
+3. **Email Templates → Confirm signup:**
 
    ```html
-   <a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email">
+   <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">
      Confirmar mi cuenta
    </a>
    ```
 
-El paso 3 importa más de lo que parece. La plantilla de fábrica manda un enlace
-del flujo PKCE, cuyo verificador vive en las cookies del navegador donde se hizo
-el registro: si el tendero se registra en el computador de la tienda y abre el
-correo en el celular, el enlace falla. Con `TokenHash` la validación es entera
-del servidor y funciona desde cualquier equipo. La ruta acepta las dos formas, así
-que nada se rompe mientras la plantilla siga sin cambiar.
+4. **Email Templates → Reset password:**
+
+   ```html
+   <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">
+     Poner una contraseña nueva
+   </a>
+   ```
+
+   Ojo al `&` en vez de `?`: esa dirección ya lleva `?next=/admin/clave`. Si se
+   escribe de la otra forma también funciona, porque la ruta deduce el destino
+   del `type=recovery`.
+
+Las plantillas usan `{{ .RedirectTo }}` y no `{{ .SiteURL }}` porque la
+aplicación manda el destino en cada petición; con `SiteURL` se perdería el
+`next`.
+
+Los pasos 3 y 4 importan más de lo que parecen. La plantilla de fábrica manda un
+enlace del flujo PKCE, cuyo verificador vive en las cookies del navegador donde
+se pidió: si el tendero se registra en el computador de la tienda y abre el correo
+en el celular, el enlace falla. Con `TokenHash` la validación es entera del
+servidor y funciona desde cualquier equipo. La ruta acepta las dos formas, así que
+nada se rompe mientras las plantillas sigan sin cambiar.
 
 Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
-correos por hora y suele caer en no deseado.
+correos por hora y suele caer en no deseado. Sin él, la confirmación y la
+recuperación funcionan a medias en cuanto haya varias tiendas.
 
 ## Catálogo de ejemplo
 
@@ -178,6 +257,7 @@ catálogo y el historial de ventas de todas.
 - Los pedidos se crean con la función `create_order` (atómica: descuenta stock y evita sobreventa).
 - Las ventas en tienda se registran con `create_pos_sale`; los informes con `sales_report` y `cash_closing`.
 - La confirmación de pedido se lee vía `get_order_public` por UUID.
+- El alta de tiendas: `store_invites` con el código y, opcional, el correo reservado; el disparador `crear_tienda_al_registrarse` y la función `canjear_invitacion` para quien entra por un proveedor.
 
 ---
 

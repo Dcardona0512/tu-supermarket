@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import AccesoProveedores from "@/components/AccesoProveedores";
 
 /**
  * Alta de una tienda con código de invitación.
@@ -180,6 +181,11 @@ export default function RegistroForm() {
           </Link>
         </p>
       </form>
+
+      {/* Con estos no se puede mandar el código en el registro, así que después
+          de entrar la aplicación lo pide, salvo que su correo ya estuviera
+          reservado en la invitación. */}
+      <AccesoProveedores etiqueta="o usa una cuenta que ya tengas" />
     </Marco>
   );
 }

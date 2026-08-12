@@ -37,10 +37,15 @@ async function requirePlatformAdmin() {
  *
  * El tendero se registra él mismo con ese código y elige su contraseña: así
  * nadie entra sin permiso y tú no llegas a conocer su clave.
+ *
+ * El correo es opcional y sirve para un caso concreto: si entra con Google,
+ * Facebook o Apple no hay forma de mandar el código en el registro, así que la
+ * base reconoce la invitación por el correo y le abre la tienda sola.
  */
 export async function createInvite(
   storeName: string,
   slug: string,
+  email = "",
   diasValidez = 30
 ): Promise<Result & { code?: string }> {
   try {
@@ -52,6 +57,11 @@ export async function createInvite(
     const enlace = toSlug(slug || storeName);
     if (enlace.length < 3) {
       return { ok: false, error: "El enlace debe tener al menos 3 caracteres" };
+    }
+
+    const correo = email.trim().toLowerCase();
+    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      return { ok: false, error: "Ese correo no parece válido" };
     }
 
     const { data: codigo, error: errCodigo } = await supabase.rpc(
@@ -67,16 +77,28 @@ export async function createInvite(
       store_name: nombre,
       slug: enlace,
       created_by: user.id,
+      email: correo || null,
       expires_at: expira.toISOString(),
     });
 
     if (error) {
       // El slug es único entre invitaciones, pero además puede chocar con una
       // tienda que ya exista o con un nombre reservado de la plataforma.
-      const msg = error.message.includes("slug")
-        ? `El enlace "${enlace}" ya está tomado o es un nombre reservado`
-        : error.message;
-      return { ok: false, error: msg };
+      if (error.message.includes("slug")) {
+        return {
+          ok: false,
+          error: `El enlace "${enlace}" ya está tomado o es un nombre reservado`,
+        };
+      }
+      // Solo puede haber una invitación abierta por correo: si no, la segunda
+      // quedaría muerta sin que nadie se diera cuenta.
+      if (error.message.includes("email")) {
+        return {
+          ok: false,
+          error: `Ya hay una invitación sin usar para ${correo}`,
+        };
+      }
+      return { ok: false, error: error.message };
     }
 
     revalidatePath("/plataforma");

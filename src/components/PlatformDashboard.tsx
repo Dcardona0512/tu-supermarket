@@ -23,6 +23,8 @@ type Invite = {
   code: string;
   storeName: string;
   slug: string;
+  /** Correo reservado, si se puso al invitar. */
+  correo: string | null;
   usada: boolean;
   vencida: boolean;
   expira: string;
@@ -44,6 +46,7 @@ export default function PlatformDashboard({
   const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [enlace, setEnlace] = useState("");
+  const [correo, setCorreo] = useState("");
   const [creando, setCreando] = useState(false);
   const [nuevoCodigo, setNuevoCodigo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +66,7 @@ export default function PlatformDashboard({
     setError(null);
     setNuevoCodigo(null);
 
-    const res = await createInvite(nombre, enlace);
+    const res = await createInvite(nombre, enlace, correo);
     setCreando(false);
 
     if (!res.ok) {
@@ -73,6 +76,7 @@ export default function PlatformDashboard({
     setNuevoCodigo(res.code ?? null);
     setNombre("");
     setEnlace("");
+    setCorreo("");
     router.refresh();
   }
 
@@ -168,6 +172,28 @@ export default function PlatformDashboard({
                 className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               />
             </div>
+            <div className="min-w-48 flex-1">
+              <label className="mb-1 block text-xs font-medium text-neutral-600">
+                Su correo (opcional)
+              </label>
+              <input
+                type="email"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+                placeholder="para que entre con Google"
+                autoCapitalize="none"
+                spellCheck={false}
+                className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              />
+            </div>
+            {/* Reservar el correo es lo que le permite entrar con Google,
+                Facebook o Apple sin escribir el código: al no poder mandarlo en
+                ese registro, la tienda se reconoce por el correo. Si se deja
+                vacío, tendrá que escribir el código después de entrar. */}
+            <p className="w-full text-xs text-neutral-500">
+              Si escribes su correo, al entrar con Google, Facebook o Apple su
+              tienda se abre sola. Si no, le toca escribir el código.
+            </p>
             {/* Se muestra el enlace que va a quedar: es la única forma de no
                 equivocarse, porque el nombre corto no se puede cambiar después. */}
             <p className="w-full text-xs text-neutral-500">
@@ -273,6 +299,7 @@ export default function PlatformDashboard({
                     <p className="truncate text-sm">{i.storeName}</p>
                     <p className="truncate text-xs text-neutral-500">
                       /{i.slug} · vence {i.expira}
+                      {i.correo && ` · ${i.correo}`}
                     </p>
                   </div>
                   <span

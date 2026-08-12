@@ -35,8 +35,15 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/admin") || path.startsWith("/plataforma");
   const isLoginPage = path === "/admin/login";
 
+  // Cuelgan de `/admin` pero son justo para quien no puede entrar. `/admin/clave`
+  // se deja pasar sin sesión a propósito: así explica que el enlace ya se usó,
+  // en vez de rebotar al acceso sin decir por qué. Sin sesión no puede cambiar
+  // ninguna contraseña.
+  const esPublica =
+    isLoginPage || path === "/admin/recuperar" || path === "/admin/clave";
+
   // Proteger el dashboard: sin sesión -> login
-  if (isAdminArea && !isLoginPage && !user) {
+  if (isAdminArea && !esPublica && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);

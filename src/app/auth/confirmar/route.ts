@@ -44,8 +44,17 @@ export async function GET(request: NextRequest) {
 
   // A dónde va después de confirmar. Se acepta solo una ruta interna: un
   // `next` con dominio ajeno convertiría el correo en un salto a otro sitio.
+  //
+  // Si no viene, se deduce del tipo de enlace. Así el correo de recuperación
+  // deja al tendero en la pantalla de la contraseña nueva escriba la plantilla
+  // con `next` o sin él, que es fácil de olvidar.
   const next = searchParams.get("next");
-  const destino = next && /^\/[^/\\]/.test(next) ? next : "/admin";
+  const destino =
+    next && /^\/[^/\\]/.test(next)
+      ? next
+      : type === "recovery"
+        ? "/admin/clave"
+        : "/admin";
 
   // El propio Supabase puede avisar de que el enlace venció o ya se usó
   const errorEnlace =

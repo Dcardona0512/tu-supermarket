@@ -312,6 +312,7 @@ export type Database = {
           code: string
           created_at: string
           created_by: string
+          email: string | null
           expires_at: string
           id: string
           slug: string
@@ -323,6 +324,7 @@ export type Database = {
           code: string
           created_at?: string
           created_by: string
+          email?: string | null
           expires_at?: string
           id?: string
           slug: string
@@ -334,6 +336,7 @@ export type Database = {
           code?: string
           created_at?: string
           created_by?: string
+          email?: string | null
           expires_at?: string
           id?: string
           slug?: string
@@ -409,6 +412,7 @@ export type Database = {
         }[]
       }
       cash_closing: { Args: { p_date?: string }; Returns: Json }
+      canjear_invitacion: { Args: { p_code: string }; Returns: Json }
       generar_codigo_invitacion: { Args: Record<string, never>; Returns: string }
       is_platform_admin: { Args: Record<string, never>; Returns: boolean }
       my_store_id: { Args: Record<string, never>; Returns: string }

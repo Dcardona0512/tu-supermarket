@@ -1,9 +1,11 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toLoginEmail } from "@/lib/admin-user";
+import AccesoProveedores from "@/components/AccesoProveedores";
 
 export default function AdminLoginPage() {
   // El formulario lee la dirección para mostrar el aviso que puede dejar el
@@ -60,7 +62,7 @@ function LoginForm() {
 
         {aviso && !error && (
           <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            {aviso} Entra con tu correo y contraseña.
+            {aviso} Entra por aquí.
           </p>
         )}
 
@@ -81,9 +83,17 @@ function LoginForm() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-600">
-              Contraseña
-            </label>
+            <div className="mb-1 flex items-baseline justify-between gap-2">
+              <label className="text-xs font-medium text-neutral-600">
+                Contraseña
+              </label>
+              <Link
+                href="/admin/recuperar"
+                className="text-xs font-medium text-brand-ink hover:underline"
+              >
+                ¿La olvidaste?
+              </Link>
+            </div>
             {/* El ojo deja comprobar lo que se escribió: en el celular es fácil
                 equivocarse y el error de acceso no dice en qué campo falló. */}
             <div className="relative">
@@ -123,6 +133,8 @@ function LoginForm() {
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
+
+        <AccesoProveedores />
       </div>
     </div>
   );

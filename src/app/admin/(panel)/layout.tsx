@@ -19,27 +19,16 @@ export default async function PanelLayout({
 
   if (!user) redirect("/admin/login");
 
-  // Sin tienda no hay panel que mostrar: pasa si la cuenta se creó a mano en
-  // Supabase sin darla de alta como tienda.
   const { data: store } = await supabase
     .from("stores")
     .select("id, slug, name, logo_url, brand_color")
     .eq("owner_id", user.id)
     .maybeSingle();
 
-  if (!store) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-neutral-100 px-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-sm">
-          <h1 className="text-lg font-bold">Esta cuenta no tiene tienda</h1>
-          <p className="mt-2 text-sm text-neutral-600">
-            No hay ninguna tienda asociada a {toDisplayUser(user.email)}, así que
-            no hay nada que administrar.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Sin tienda no hay panel, pero sí hay salida: pasa cuando entra con Google,
+  // Facebook o Apple y su correo no estaba reservado en la invitación, así que
+  // lo que le falta es canjear su código.
+  if (!store) redirect("/registro");
 
   // Pedidos web sin atender: se muestran como aviso en el menú. Las políticas
   // ya lo limitan a esta tienda.
