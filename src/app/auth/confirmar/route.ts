@@ -3,23 +3,34 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Aterrizaje del correo de confirmación.
+ * Aterrizaje de los correos y de los proveedores de acceso.
  *
  * Sin esta ruta, el enlace del correo devolvía al tendero a la raíz del sitio
  * con el código de acceso colgando en la dirección, y ahí no había nada que lo
  * canjeara: veía una página que no funcionaba justo cuando acababa de abrir su
- * tienda. Aquí se canjea el código, queda la sesión abierta y entra derecho a
- * su panel.
+ * tienda.
  *
- * Se admiten las dos formas en que Supabase puede devolver la confirmación:
+ * Se admiten las dos formas en que Supabase puede devolver un enlace:
  *
  *   - `token_hash` + `type`, del enlace por plantilla. Es el bueno: se valida
  *     entero en el servidor, así que sirve aunque el tendero se registre en el
  *     computador y abra el correo en el celular. Requiere dejar la plantilla
  *     como se explica en el README.
  *   - `code`, del flujo PKCE, que es lo que manda Supabase con la plantilla de
- *     fábrica. Solo funciona en el mismo navegador donde se hizo el registro,
- *     porque el verificador queda en sus cookies.
+ *     fábrica y también lo que devuelven Google, Facebook y Apple. Con el correo
+ *     solo funciona en el mismo navegador donde se hizo el registro, porque el
+ *     verificador queda en sus cookies.
+ *
+ * A dónde cae después depende de para qué era el enlace:
+ *
+ *   - **confirmar la cuenta:** al acceso, y se cierra la sesión que acababa de
+ *     abrirse. Confirmar el correo demuestra que la dirección es suya, no que
+ *     quien abrió el correo sea él, así que entra escribiendo sus credenciales.
+ *   - **recuperar la contraseña:** a la pantalla de la contraseña nueva, con la
+ *     sesión abierta, que es justo lo que hace falta para poder cambiarla.
+ *   - **un proveedor:** a su panel. Ahí la identidad la acaba de comprobar
+ *     Google, Facebook o Apple, y volver a pedirle contraseña no tendría
+ *     sentido: puede que ni tenga una.
  *
  * Si algo falla se manda al acceso con el motivo en español, nunca a una página
  * en blanco.
@@ -42,19 +53,10 @@ export async function GET(request: NextRequest) {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
 
-  // A dónde va después de confirmar. Se acepta solo una ruta interna: un
-  // `next` con dominio ajeno convertiría el correo en un salto a otro sitio.
-  //
-  // Si no viene, se deduce del tipo de enlace. Así el correo de recuperación
-  // deja al tendero en la pantalla de la contraseña nueva escriba la plantilla
-  // con `next` o sin él, que es fácil de olvidar.
+  // Solo se acepta una ruta interna: un `next` con dominio ajeno convertiría el
+  // correo en un salto a otro sitio.
   const next = searchParams.get("next");
-  const destino =
-    next && /^\/[^/\\]/.test(next)
-      ? next
-      : type === "recovery"
-        ? "/admin/clave"
-        : "/admin";
+  const pedido = next && /^\/[^/\\]/.test(next) ? next : null;
 
   // El propio Supabase puede avisar de que el enlace venció o ya se usó
   const errorEnlace =
@@ -68,23 +70,47 @@ export async function GET(request: NextRequest) {
       token_hash: tokenHash,
       type: type as EmailOtpType,
     });
-    if (!error) return NextResponse.redirect(`${origin}${destino}`);
-    return alAcceso(origin, traducir(error.message));
+    if (error) return alAcceso(origin, traducir(error.message));
+
+    if (type === "recovery") {
+      return NextResponse.redirect(`${origin}${pedido ?? "/admin/clave"}`);
+    }
+
+    // Cuenta confirmada: se cierra la sesión y entra él con sus credenciales.
+    await supabase.auth.signOut();
+    return alAcceso(origin, null, "confirmado");
   }
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${destino}`);
-    return alAcceso(origin, traducir(error.message));
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) return alAcceso(origin, traducir(error.message));
+
+    // Este mismo camino sirve para el correo y para los proveedores. Cuál fue lo
+    // dice el propio usuario: `email` cuando la cuenta es de correo y
+    // contraseña, y el nombre del proveedor cuando entró con uno.
+    const proveedor = data.user?.app_metadata?.provider ?? "email";
+    if (proveedor !== "email") {
+      return NextResponse.redirect(`${origin}${pedido ?? "/admin"}`);
+    }
+
+    if (pedido) return NextResponse.redirect(`${origin}${pedido}`);
+
+    await supabase.auth.signOut();
+    return alAcceso(origin, null, "confirmado");
   }
 
   return alAcceso(origin, "El enlace del correo está incompleto.");
 }
 
-/** Recibe el motivo ya en español: los de Supabase pasan antes por `traducir`. */
-function alAcceso(origin: string, motivo: string) {
+/**
+ * Al acceso, con un aviso. `motivo` va ya en español: los de Supabase pasan
+ * antes por `traducir`. `bandera` es para las buenas noticias, que las pinta el
+ * formulario de otro color.
+ */
+function alAcceso(origin: string, motivo: string | null, bandera?: string) {
   const url = new URL("/admin/login", origin);
-  url.searchParams.set("aviso", motivo);
+  if (motivo) url.searchParams.set("aviso", motivo);
+  if (bandera) url.searchParams.set(bandera, "1");
   return NextResponse.redirect(url);
 }
 
@@ -104,9 +130,6 @@ function traducir(mensaje: string): string {
   }
   if (m.includes("already") || m.includes("confirmed")) {
     return "Tu cuenta ya estaba confirmada.";
-  }
-  if (m.includes("access_denied")) {
-    return "No se pudo confirmar con ese enlace.";
   }
   return "No se pudo confirmar con ese enlace.";
 }

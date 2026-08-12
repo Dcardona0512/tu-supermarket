@@ -129,16 +129,31 @@ la aplicación.
 
 ## Formas de entrar
 
-El tendero puede entrar de tres maneras, y **todas terminan en el mismo sitio**:
-`/auth/confirmar`, que canjea el enlace o el código del proveedor, abre la sesión
-y lo deja en `/admin`. Si algo falla, cae en el acceso con el motivo en español,
-nunca en una página en blanco.
+El tendero puede entrar de tres maneras, y **todas pasan por el mismo sitio**:
+`/auth/confirmar`, que canjea el enlace del correo o el código del proveedor. Si
+algo falla, cae en el acceso con el motivo en español, nunca en una página en
+blanco.
 
-| Forma | Qué necesita |
-| --- | --- |
-| Correo y contraseña | el código de invitación, escrito en `/registro` |
-| Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar |
-| Recuperar contraseña | `/admin/recuperar` le manda un enlace a su correo |
+| Forma | Qué necesita | Dónde aterriza |
+| --- | --- | --- |
+| Correo y contraseña | el código de invitación, escrito en `/registro` | el acceso, a escribir sus credenciales |
+| Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar | su panel |
+| Recuperar contraseña | `/admin/recuperar` le manda un enlace a su correo | la pantalla de la contraseña nueva |
+
+Los tres destinos son distintos a propósito:
+
+- Al **confirmar la cuenta** se cierra la sesión que el enlace acababa de abrir y
+  se le pide entrar. Confirmar el correo demuestra que la dirección es suya, no
+  que quien abrió el correo sea él.
+- Al **recuperar la contraseña** la sesión se mantiene, porque es justo lo que
+  hace falta para poder cambiarla.
+- Con un **proveedor** se entra derecho al panel: la identidad la acaba de
+  comprobar Google, Facebook o Apple, y volver a pedir contraseña no tendría
+  sentido cuando puede que ni tenga una.
+
+Los dos primeros llegan por el mismo `?code=`, así que cuál fue lo dice el propio
+usuario: `app_metadata.provider` vale `email` en las cuentas de correo y el nombre
+del proveedor en las demás.
 
 ### Quién termina con tienda
 
@@ -209,7 +224,11 @@ Son justo las mismas cinco, para que la pantalla y la base no se contradigan.
 
 En *Authentication*, una sola vez por proyecto:
 
-1. **URL Configuration → Site URL:** el dominio de producción.
+1. **URL Configuration → Site URL:** el dominio de producción,
+   `https://tusupermarket.vercel.app`. De fábrica viene `http://localhost:3000`, y
+   ese es el valor al que Supabase manda al tendero **cuando no puede usar el
+   destino que pide la aplicación**. Es el síntoma clásico: el correo llega bien,
+   la cuenta se confirma bien, y el enlace lo lleva a localhost.
 2. **URL Configuration → Redirect URLs:** añadir
 
    ```
@@ -218,8 +237,9 @@ En *Authentication*, una sola vez por proyecto:
    ```
 
    El `**` del final hace falta porque el enlace de recuperación lleva
-   `?next=/admin/clave`. Sin estas entradas Supabase ignora el destino y devuelve
-   al Site URL.
+   `?next=/admin/clave`. Sin estas entradas Supabase ignora el destino que manda
+   la aplicación y devuelve al Site URL — o sea, a localhost si el paso 1 sigue
+   sin hacerse.
 3. **Email Templates → Confirm signup:**
 
    ```html

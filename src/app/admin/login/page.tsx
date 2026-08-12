@@ -20,8 +20,10 @@ export default function AdminLoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  // Lo deja `/auth/confirmar` cuando el enlace del correo ya venció o se usó
+  // Los dos los deja `/auth/confirmar`: `aviso` cuando el enlace del correo
+  // falló, `confirmado` cuando salió bien y ya solo falta que entre.
   const aviso = params.get("aviso");
+  const confirmado = params.get("confirmado") === "1";
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -59,6 +61,12 @@ function LoginForm() {
           <h1 className="mt-3 text-lg font-bold">Panel de administración</h1>
           <p className="text-sm tracking-wide text-neutral-500">TU SUPERMARKET</p>
         </div>
+
+        {confirmado && !error && (
+          <p className="mb-4 rounded-lg bg-green-50 px-3 py-2 text-xs text-green-800">
+            ¡Tu cuenta quedó confirmada! Entra con tu correo y tu contraseña.
+          </p>
+        )}
 
         {aviso && !error && (
           <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">

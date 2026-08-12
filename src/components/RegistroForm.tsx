@@ -75,7 +75,8 @@ export default function RegistroForm() {
         <h1 className="text-lg font-bold">Ya casi</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Te enviamos un correo a <strong>{email}</strong> para confirmar tu
-          cuenta. Ábrelo y el enlace te lleva directo a tu panel.
+          cuenta. Ábrelo y el enlace te trae de vuelta al acceso, para que entres
+          con el correo y la contraseña que acabas de elegir.
         </p>
         <p className="mt-2 text-xs text-neutral-500">
           Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
