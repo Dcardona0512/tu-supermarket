@@ -17,6 +17,7 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/recuperar` | pedir el enlace para poner otra contraseña |
 | `/clave` | escribir la contraseña nueva |
 | `/auth/confirmar` | aterrizaje de los correos y de Google, Facebook y Apple |
+| `/demo/panel` | una muestra del panel, abierta sin cuenta. Solo existe para la tienda de demostración |
 
 ## Cambiar el dominio
 
@@ -47,7 +48,7 @@ que relacione cada dominio con su tienda.
 - Búsqueda y filtro por categoría y subcategoría.
 - Carrito persistente (localStorage).
 - Checkout contra entrega con formulario (nombre, celular, dirección) y confirmación con número de pedido.
-- Enlace al panel en el pie de página, para que el tendero entre desde su propia tienda.
+- Enlace al panel en el pie de página, para que el tendero entre desde su propia tienda. En la demostración, además, un botón para conocer el panel sin tener cuenta.
 
 ### Dashboard (administrador)
 - Acceso con usuario y contraseña.
@@ -277,66 +278,87 @@ Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
 correos por hora y suele caer en no deseado. Sin él, la confirmación y la
 recuperación funcionan a medias en cuanto haya varias tiendas.
 
-## La demostración
+## Conocer el panel sin tener cuenta
 
-Las dos administraciones están **separadas**, y por eso hay dos entradas
-distintas:
+Las dos administraciones están **separadas**:
 
 | | Quién entra | Cómo |
 | --- | --- | --- |
 | `/administrador` | tú | con tu correo y contraseña. Si entras a `/admin`, el panel te devuelve aquí: desde tu cuenta no se atiende ninguna tienda |
 | `/admin` | un tendero | con las credenciales de su cuenta |
-| `/admin` de la demo | cualquiera | desde el botón del pie de `/demo`, **sin usuario ni contraseña** |
 
-Lo último se apoya en las **sesiones anónimas** de Supabase: el visitante recibe
-un token de verdad, con rol `authenticated` y la marca `is_anonymous`, y
-`my_store_id()` lo reconoce como administrador de la tienda `demo`. Así **todas
-las políticas y funciones que ya existían siguen valiendo tal cual** — una
-función cambia, cero políticas nuevas sobre las tablas de negocio. Abrir permisos
-al rol público habría multiplicado la superficie por veinte.
+Al panel **no se entra sin cuenta**, y eso no se negocia: es el mismo panel que
+usan las tiendas de los clientes.
 
-**Hay que habilitarlo una vez** en *Authentication → Sign In / Providers →
-Anonymous sign-ins*. Mientras esté apagado, el botón lo dice en vez de fallar
-callado.
+Para que un tendero interesado pueda verlo, el pie de la tienda de demostración
+lleva **dos botones**:
 
-### Qué puede y qué no puede el visitante
+- **Conocer el panel** → `/demo/panel`. Una muestra que se abre sin cuenta.
+- **Entrar al panel** → `/login`. El acceso normal.
 
-Puede **todo dentro de la demo**: crear y borrar productos, mover categorías,
-vender en el POS, atender pedidos, ver informes, y hasta cambiar el nombre y el
-color en *Personalizar tienda*. Comprobado por SQL que no alcanza nada de otra
-tienda: ni lee ni escribe, ni renombra, ni canjea códigos de invitación.
+En el escaparate de un cliente solo aparece el segundo. El panel de un cliente no
+se enseña, y `/mi-tienda/panel` responde 404 en cualquier tienda que no sea la
+demostración.
 
-**No puede subir archivos.** Es el único permiso que se le niega, y no por
-prudencia genérica: un botón de subida abierto a internet es alojamiento gratis
-para cualquiera en el almacenamiento del proyecto, y eso no lo arregla un botón
-de restaurar. Si lo intenta, la pantalla se lo dice con sus palabras.
+### La muestra no es el panel
+
+`/demo/panel` es una página que **retrata** el panel. No tiene un solo control que
+escriba —cero formularios, cero campos, cero botones de acción, comprobado en el
+navegador—, no abre sesión y no necesita ningún permiso nuevo. No hay nada que un
+visitante pueda estropear, así que tampoco hace falta un botón de restaurar.
+
+Lo único real son los **productos y las categorías**, que ya son públicos porque
+los muestra el escaparate. Los pedidos y los números del resumen son de ejemplo:
+los pedidos no son públicos y no se van a hacer públicos para una demostración.
+
+### Por qué no es el panel de verdad
+
+Se intentaron los dos caminos para que un visitante administrara la demo con el
+panel real, y los dos exigían tocar `my_store_id()`, la función de la que cuelgan
+las políticas de las cinco tablas de negocio, las del bucket y cuatro funciones —
+es decir, todo el aislamiento entre tiendas:
+
+1. **Sesiones anónimas de Supabase.** La más limpia: una función cambia y ninguna
+   política. Quedó descartada porque hay que habilitarlas en el panel de control
+   del proyecto.
+2. **Permisos al rol público, acotados a la demo.** Seis políticas con el
+   identificador de la demo escrito dentro. Quedó descartada por decisión del
+   dueño: no vale arriesgar los datos de sus clientes para enseñar una pantalla.
+
+Ambas están probadas y documentadas en el historial de git por si alguna vez
+cambia el criterio. Lo que hay hoy no toca el aislamiento en absoluto.
 
 ### Una sola definición de «la tienda de esta sesión»
 
-`set_store_id`, el disparador que rellena `store_id` al insertar en las cinco
-tablas de negocio, resolvía la tienda por su cuenta con `owner_id = auth.uid()`.
-Era la misma regla que `my_store_id()` escrita dos veces, y no se notó hasta que
-apareció un segundo caso: al visitante de la demostración las políticas le
-dejaban escribir, pero el disparador abortaba el insert con «No hay una tienda
-asociada a este usuario». No podía crear ni un producto ni una categoría.
+De todo aquello se quedó una cosa, porque era un fallo de verdad. `set_store_id`,
+el disparador que rellena `store_id` al insertar en las cinco tablas de negocio,
+resolvía la tienda por su cuenta con `owner_id = auth.uid()`. Era la misma regla
+que `my_store_id()` escrita dos veces, y en cuanto apareció un segundo caso las
+dos definiciones dejaron de coincidir: las políticas dejaban escribir y el
+disparador abortaba el insert.
 
-Ahora pregunta a `my_store_id()` como todo lo demás. Si alguna vez hace falta un
-tercer caso, se añade en un solo sitio.
+Ahora pregunta a `my_store_id()` como todo lo demás.
 
-### El botón de restaurar
+### El nombre corto de la demostración
 
-En el panel de la demo hay un aviso permanente con **Restaurar la
-demostración**, que llama a `reset_demo()`: borra lo que haya, vuelve a sembrar
-el catálogo, devuelve la marca a la de fábrica y recrea los tres pedidos de
-ejemplo (uno entregado, uno cancelado y uno pendiente).
+Vive en [`src/lib/demo.ts`](src/lib/demo.ts), un módulo sin `"use client"` ni
+importaciones de servidor, porque lo necesitan los dos lados: el escaparate —de
+cliente— para saber que su pie lleva el botón, y la muestra —de servidor— para
+responder solo a esta tienda.
 
-Sin ese botón, el primer visitante que vaciara el catálogo dejaría sin
-demostración a todos los demás.
+Estuvo un rato en `store-context.tsx`, que es de cliente, y desde el servidor
+llegaba `undefined`: Next sustituye los módulos de cliente por una referencia
+cuando los importa el servidor, y las constantes se quedan por el camino. El
+síntoma era un 404 sin ningún error en el registro.
 
-**El filtro por tienda va repetido en cada borrado de esa función, a propósito.**
-La versión anterior se eliminó porque borraba sin `where` y podía vaciar el
-catálogo y el historial de todas las tiendas de los clientes. Solo la puede
-llamar quien administra la demo; a una tienda cualquiera la rechaza.
+### Y las páginas del escaparate van en un grupo
+
+Los archivos de la tienda viven en `src/app/[slug]/(tienda)/`, con su layout
+dentro. El paréntesis no aparece en la dirección: `/mi-tienda` y
+`/mi-tienda/carrito` siguen igual. Está así para que `/demo/panel`, que es
+hermano del grupo y no hijo, **no herede la barra de la tienda**: la muestra se
+dibujaba con el encabezado y el botón del carrito encima, y eso rompía justo la
+ilusión que la página busca dar.
 
 ## Catálogo de ejemplo
 
@@ -352,9 +374,10 @@ El tendero quita lo que no le sirva desde **Productos** y ajusta las categorías
 con el botón **Categorías**.
 
 `seed_store_catalog` solo inserta, nunca borra, y no hace nada si la tienda ya
-tiene catálogo. `reset_demo` volvió, porque al panel de la demo entra cualquiera y hay que poder
-repararla, pero ahora lleva el filtro por tienda en cada borrado y solo la puede
-llamar quien administra la demo. Ninguna otra función borra datos en masa.
+tiene catálogo. **No existe ninguna función que borre datos en masa.** `reset_demo` se escribió y
+se probó para poder reparar la demostración cuando cualquiera podía editarla, y se
+eliminó al descartar ese camino: sin panel de verdad abierto al público, no hay
+nada que reparar.
 
 ## Modelo de datos (Supabase)
 

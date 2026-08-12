@@ -3,7 +3,8 @@
 import StoreHeader from "@/components/StoreHeader";
 import CartDrawer from "@/components/CartDrawer";
 import EntrarAlPanel from "@/components/EntrarAlPanel";
-import { useStore, SLUG_DEMO } from "@/lib/store-context";
+import { useStore } from "@/lib/store-context";
+import { SLUG_DEMO } from "@/lib/demo";
 
 /**
  * Estructura de la tienda. El panel del carrito se abre encima del catálogo,
@@ -30,7 +31,7 @@ export default function StoreShell({
         {/* Entrada al panel. Va aquí abajo y no en la barra de arriba a
             propósito: al cliente que viene a mercar no le sirve de nada y
             competiría con el carrito. Quien la busca es el tendero. */}
-        <EntrarAlPanel esDemo={store.slug === SLUG_DEMO} />
+        <EntrarAlPanel slug={store.slug} esDemo={store.slug === SLUG_DEMO} />
       </footer>
 
       <CartDrawer />

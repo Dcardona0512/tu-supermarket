@@ -1,72 +1,62 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 /**
- * El enlace del pie del escaparate que lleva al panel.
+ * El pie del escaparate, con las entradas al panel.
  *
- * Se comporta de dos maneras según de qué tienda sea la página:
+ * En la tienda de demostración hay dos, porque son dos cosas distintas:
  *
- *   - **una tienda de verdad:** lleva al acceso, que le pide sus credenciales.
- *   - **la demostración:** entra directo, sin usuario ni contraseña. Abre una
- *     sesión anónima y la base la reconoce como administradora de la demo. Es lo
- *     que permite mostrarle el sistema a un tendero sin darle una cuenta.
+ *   - **conocer el panel:** una muestra que se abre sin cuenta. No es el panel de
+ *     verdad, es una página que lo retrata, así que no hay nada que estropear.
+ *   - **entrar al panel:** el acceso normal, con correo y contraseña.
  *
- * Las sesiones anónimas hay que habilitarlas en Supabase. Mientras no lo estén,
- * el botón lo dice en vez de fallar en silencio.
+ * En una tienda de un cliente solo aparece la segunda: su panel no se enseña.
  */
-export default function EntrarAlPanel({ esDemo }: { esDemo: boolean }) {
-  const router = useRouter();
-  const [entrando, setEntrando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function EntrarAlPanel({
+  slug,
+  esDemo,
+}: {
+  slug: string;
+  esDemo: boolean;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+      {esDemo && (
+        <Link
+          href={`/${slug}/panel`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 py-1.5 font-medium text-neutral-600 transition hover:bg-neutral-50 hover:text-neutral-900"
+        >
+          <IconoOjo />
+          Conocer el panel
+        </Link>
+      )}
 
-  const clases =
-    "mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700";
-
-  if (!esDemo) {
-    return (
-      <Link href="/login" className={clases}>
+      <Link
+        href="/login"
+        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700"
+      >
         <IconCandado />
         Entrar al panel
       </Link>
-    );
-  }
+    </div>
+  );
+}
 
-  async function entrar() {
-    setError(null);
-    setEntrando(true);
-
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInAnonymously();
-
-    if (authError) {
-      setEntrando(false);
-      setError(
-        /anonymous/i.test(authError.message)
-          ? "Falta habilitar las sesiones anónimas en Supabase."
-          : "No se pudo abrir la demostración."
-      );
-      return;
-    }
-
-    router.push("/admin");
-    router.refresh();
-  }
-
+function IconoOjo() {
   return (
-    <>
-      <button onClick={entrar} disabled={entrando} className={clases}>
-        <IconCandado />
-        {entrando ? "Abriendo el panel..." : "Ver el panel de administración"}
-      </button>
-
-      {error && (
-        <p className="mt-2 text-xs text-red-600">{error}</p>
-      )}
-    </>
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
   );
 }
 

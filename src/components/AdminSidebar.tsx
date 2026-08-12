@@ -38,7 +38,6 @@ export default function AdminSidebar({
   storeSlug,
   storeLogoUrl = null,
   storeBrandColor = "#1d4ed8",
-  esDemo = false,
 }: {
   user: string;
   /** Pedidos en línea sin atender, para avisar en el menú. */
@@ -51,8 +50,6 @@ export default function AdminSidebar({
   storeLogoUrl?: string | null;
   /** Color de la tienda, solo para el distintivo: el resto del panel no cambia. */
   storeBrandColor?: string;
-  /** Cierto en el panel de la demostración, al que se entra sin contraseña. */
-  esDemo?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -61,9 +58,7 @@ export default function AdminSidebar({
   async function logout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    // Al visitante de la demo se le devuelve al escaparate, que es de donde
-    // vino: mandarlo al acceso sería pedirle una cuenta que no tiene.
-    router.push(esDemo ? `/${storeSlug}` : "/login");
+    router.push("/login");
     router.refresh();
   }
 
