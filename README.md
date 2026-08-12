@@ -45,6 +45,7 @@ que relacione cada dominio con su tienda.
 - Búsqueda y filtro por categoría y subcategoría.
 - Carrito persistente (localStorage).
 - Checkout contra entrega con formulario (nombre, celular, dirección) y confirmación con número de pedido.
+- Enlace al panel en el pie de página, para que el tendero entre desde su propia tienda.
 
 ### Dashboard (administrador)
 - Acceso con usuario y contraseña.
@@ -182,6 +183,27 @@ pantalla del proveedor:
 ```
 https://EL-PROYECTO.supabase.co/auth/v1/callback
 ```
+
+### Contraseña segura
+
+Al crear la cuenta y al cambiarla se exigen cinco cosas, y la pantalla las va
+marcando mientras el tendero escribe en vez de soltarle el error al enviar:
+
+- 8 caracteres
+- una letra mayúscula
+- una letra minúscula
+- un número
+- un signo
+
+Las reglas viven en [`src/lib/password.ts`](src/lib/password.ts), un solo sitio
+para las dos pantallas. Pero **eso es la ayuda, no la barrera**: quien llame a la
+API de Supabase sin pasar por la pantalla se la salta. Hay que exigirlas también
+en *Authentication → Sign In / Providers → Email*:
+
+- **Minimum password length:** 8
+- **Password Requirements:** *Lowercase, uppercase letters, digits and symbols*
+
+Son justo las mismas cinco, para que la pantalla y la base no se contradigan.
 
 ### Ajustes de Supabase que hay que dejar puestos
 

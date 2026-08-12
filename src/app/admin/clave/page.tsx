@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import ReglasClave from "@/components/ReglasClave";
+import { claveValida } from "@/lib/password";
 
 /**
  * Poner la contraseña nueva.
@@ -34,8 +36,8 @@ export default function ClavePage() {
     e.preventDefault();
     setError(null);
 
-    if (clave.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
+    if (!claveValida(clave)) {
+      setError("La contraseña todavía no cumple lo que se pide debajo");
       return;
     }
     if (clave !== repetida) {
@@ -128,7 +130,7 @@ export default function ClavePage() {
               {verClave ? "🙈" : "👁"}
             </button>
           </div>
-          <p className="mt-1 text-xs text-neutral-400">Mínimo 8 caracteres.</p>
+          <ReglasClave clave={clave} />
         </div>
 
         <div>

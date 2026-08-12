@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AccesoProveedores from "@/components/AccesoProveedores";
+import ReglasClave from "@/components/ReglasClave";
+import { claveValida } from "@/lib/password";
 
 /**
  * Alta de una tienda con código de invitación.
@@ -29,8 +31,8 @@ export default function RegistroForm() {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
+    if (!claveValida(password)) {
+      setError("La contraseña todavía no cumple lo que se pide debajo");
       return;
     }
 
@@ -157,7 +159,7 @@ export default function RegistroForm() {
               {showPassword ? "🙈" : "👁"}
             </button>
           </div>
-          <p className="mt-1 text-xs text-neutral-400">Mínimo 8 caracteres.</p>
+          <ReglasClave clave={password} />
         </div>
 
         {error && (
