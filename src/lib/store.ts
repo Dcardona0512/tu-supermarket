@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { initials } from "@/lib/brand";
-import type { StoreInfo } from "@/lib/store-context";
+import { SLUG_DEMO, type StoreInfo } from "@/lib/store-context";
 
 /** Fila de `stores` tal como la devuelve Supabase. */
 type StoreRow = {
@@ -58,27 +58,51 @@ export async function getStoreBySlug(
 }
 
 /**
- * La tienda del usuario que tiene la sesión abierta, para el panel.
+ * La tienda que administra la sesión abierta.
+ *
+ * Casi siempre es la que le pertenece, pero hay un caso más: al panel de la
+ * demostración se entra sin usuario ni contraseña, con una sesión anónima. Ese
+ * visitante no es dueño de nada, así que su tienda es la demo.
+ *
+ * Es el mismo criterio que aplica la base en `my_store_id()`. Vive aquí en un
+ * solo sitio para que el panel y las acciones no puedan discrepar.
+ */
+export async function getSessionStore() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { supabase, user: null, store: null, esDemo: false };
+
+  const esDemo = Boolean(user.is_anonymous);
+
+  const consulta = supabase.from("stores").select(CAMPOS);
+  const { data } = esDemo
+    ? await consulta.eq("slug", SLUG_DEMO).maybeSingle()
+    : await consulta.eq("owner_id", user.id).maybeSingle();
+
+  return {
+    supabase,
+    user,
+    store: data ? toStoreInfo(data as StoreRow) : null,
+    esDemo,
+  };
+}
+
+/**
+ * Igual que `getSessionStore`, pero para las acciones del panel: si no hay
+ * sesión o no hay tienda, no sigue.
  *
  * Sustituye al `requireAdmin` que solo comprobaba que existiera un usuario:
  * ahora además garantiza que ese usuario tenga una tienda, que es lo que
  * delimita todo lo que puede ver y tocar.
  */
 export async function requireStore() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user, store, esDemo } = await getSessionStore();
 
   if (!user) throw new Error("No autorizado");
+  if (!store) throw new Error("Esta cuenta no tiene una tienda asociada");
 
-  const { data } = await supabase
-    .from("stores")
-    .select(CAMPOS)
-    .eq("owner_id", user.id)
-    .maybeSingle();
-
-  if (!data) throw new Error("Esta cuenta no tiene una tienda asociada");
-
-  return { supabase, user, store: toStoreInfo(data as StoreRow) };
+  return { supabase, user, store, esDemo };
 }

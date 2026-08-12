@@ -413,6 +413,8 @@ export type Database = {
       }
       cash_closing: { Args: { p_date?: string }; Returns: Json }
       canjear_invitacion: { Args: { p_code: string }; Returns: Json }
+      es_sesion_demo: { Args: Record<string, never>; Returns: boolean }
+      reset_demo: { Args: Record<string, never>; Returns: Json }
       generar_codigo_invitacion: { Args: Record<string, never>; Returns: string }
       is_platform_admin: { Args: Record<string, never>; Returns: boolean }
       my_store_id: { Args: Record<string, never>; Returns: string }

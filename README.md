@@ -277,6 +277,55 @@ Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
 correos por hora y suele caer en no deseado. Sin él, la confirmación y la
 recuperación funcionan a medias en cuanto haya varias tiendas.
 
+## La demostración
+
+Las dos administraciones están **separadas**, y por eso hay dos entradas
+distintas:
+
+| | Quién entra | Cómo |
+| --- | --- | --- |
+| `/administrador` | tú | con tu correo y contraseña. Si entras a `/admin`, el panel te devuelve aquí: desde tu cuenta no se atiende ninguna tienda |
+| `/admin` | un tendero | con las credenciales de su cuenta |
+| `/admin` de la demo | cualquiera | desde el botón del pie de `/demo`, **sin usuario ni contraseña** |
+
+Lo último se apoya en las **sesiones anónimas** de Supabase: el visitante recibe
+un token de verdad, con rol `authenticated` y la marca `is_anonymous`, y
+`my_store_id()` lo reconoce como administrador de la tienda `demo`. Así **todas
+las políticas y funciones que ya existían siguen valiendo tal cual** — una
+función cambia, cero políticas nuevas sobre las tablas de negocio. Abrir permisos
+al rol público habría multiplicado la superficie por veinte.
+
+**Hay que habilitarlo una vez** en *Authentication → Sign In / Providers →
+Anonymous sign-ins*. Mientras esté apagado, el botón lo dice en vez de fallar
+callado.
+
+### Qué puede y qué no puede el visitante
+
+Puede **todo dentro de la demo**: crear y borrar productos, mover categorías,
+vender en el POS, atender pedidos, ver informes, y hasta cambiar el nombre y el
+color en *Personalizar tienda*. Comprobado por SQL que no alcanza nada de otra
+tienda: ni lee ni escribe, ni renombra, ni canjea códigos de invitación.
+
+**No puede subir archivos.** Es el único permiso que se le niega, y no por
+prudencia genérica: un botón de subida abierto a internet es alojamiento gratis
+para cualquiera en el almacenamiento del proyecto, y eso no lo arregla un botón
+de restaurar. Si lo intenta, la pantalla se lo dice con sus palabras.
+
+### El botón de restaurar
+
+En el panel de la demo hay un aviso permanente con **Restaurar la
+demostración**, que llama a `reset_demo()`: borra lo que haya, vuelve a sembrar
+el catálogo, devuelve la marca a la de fábrica y recrea los tres pedidos de
+ejemplo (uno entregado, uno cancelado y uno pendiente).
+
+Sin ese botón, el primer visitante que vaciara el catálogo dejaría sin
+demostración a todos los demás.
+
+**El filtro por tienda va repetido en cada borrado de esa función, a propósito.**
+La versión anterior se eliminó porque borraba sin `where` y podía vaciar el
+catálogo y el historial de todas las tiendas de los clientes. Solo la puede
+llamar quien administra la demo; a una tienda cualquiera la rechaza.
+
 ## Catálogo de ejemplo
 
 Cada tienda **nace con 6 categorías, 15 subcategorías y 24 productos de muestra**
@@ -291,9 +340,9 @@ El tendero quita lo que no le sirva desde **Productos** y ajusta las categorías
 con el botón **Categorías**.
 
 `seed_store_catalog` solo inserta, nunca borra, y no hace nada si la tienda ya
-tiene catálogo. **No existe ninguna función que borre datos en masa**: la que
-había (`reset_demo`) se eliminó porque no filtraba por tienda y podía vaciar el
-catálogo y el historial de ventas de todas.
+tiene catálogo. `reset_demo` volvió, porque al panel de la demo entra cualquiera y hay que poder
+repararla, pero ahora lleva el filtro por tienda en cada borrado y solo la puede
+llamar quien administra la demo. Ninguna otra función borra datos en masa.
 
 ## Modelo de datos (Supabase)
 

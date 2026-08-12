@@ -69,7 +69,11 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
 
     if (upErr) {
       setUploading(false);
-      setError("No se pudo subir el logo: " + upErr.message);
+      setError(
+        /row-level security|policy/i.test(upErr.message)
+          ? "Aquí no se puede subir un logo. En la demostración está cerrado."
+          : "No se pudo subir el logo: " + upErr.message
+      );
       return;
     }
 

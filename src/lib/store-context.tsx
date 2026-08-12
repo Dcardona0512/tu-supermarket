@@ -3,6 +3,15 @@
 import { createContext, useContext, type ReactNode } from "react";
 
 /**
+ * Nombre corto de la tienda de demostración.
+ *
+ * Vive aquí, y no junto a las consultas del servidor, porque lo necesitan los
+ * dos lados: el escaparate para saber que su botón entra sin contraseña, y el
+ * servidor para resolver la tienda de una sesión anónima.
+ */
+export const SLUG_DEMO = "demo";
+
+/**
  * La tienda que se está viendo.
  *
  * Los componentes de la tienda son todos de cliente y necesitan saber a qué

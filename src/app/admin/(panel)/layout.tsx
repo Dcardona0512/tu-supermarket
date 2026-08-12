@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 import NewOrderAlert from "@/components/NewOrderAlert";
-import { createClient } from "@/lib/supabase/server";
+import DemoBanner from "@/components/DemoBanner";
+import { getSessionStore } from "@/lib/store";
 import { toDisplayUser } from "@/lib/admin-user";
 import { darken, readableText, inkOnWhite } from "@/lib/brand";
 
@@ -12,33 +13,27 @@ export default async function PanelLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user, store, esDemo } = await getSessionStore();
 
   if (!user) redirect("/login");
 
   // Las dos administraciones están separadas: quien administra la plataforma no
   // atiende ninguna tienda, así que este panel no es el suyo y se va al suyo.
-  const { data: esAdminPlataforma } = await supabase
-    .from("platform_admins")
-    .select("user_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  // Al visitante de la demo no hace falta preguntárselo.
+  if (!esDemo) {
+    const { data: esAdminPlataforma } = await supabase
+      .from("platform_admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  if (esAdminPlataforma) redirect("/administrador");
-
-  const { data: store } = await supabase
-    .from("stores")
-    .select("id, slug, name, logo_url, brand_color")
-    .eq("owner_id", user.id)
-    .maybeSingle();
+    if (esAdminPlataforma) redirect("/administrador");
+  }
 
   // Sin tienda no hay panel, pero sí hay salida: pasa cuando entra con Google,
   // Facebook o Apple y su correo no estaba reservado en la invitación, así que
   // lo que le falta es canjear su código.
-  if (!store) redirect("/registro");
+  if (!store) redirect(esDemo ? "/login" : "/registro");
 
   // Pedidos web sin atender: se muestran como aviso en el menú. Las políticas
   // ya lo limitan a esta tienda.
@@ -56,24 +51,28 @@ export default async function PanelLayout({
       className="min-h-screen bg-neutral-100"
       style={
         {
-          "--brand": store.brand_color,
-          "--brand-dark": darken(store.brand_color),
-          "--brand-text": readableText(store.brand_color),
-          "--brand-ink": inkOnWhite(store.brand_color),
+          "--brand": store.brandColor,
+          "--brand-dark": darken(store.brandColor),
+          "--brand-text": readableText(store.brandColor),
+          "--brand-ink": inkOnWhite(store.brandColor),
         } as React.CSSProperties
       }
     >
       <AdminSidebar
-        user={toDisplayUser(user.email)}
+        user={esDemo ? "Visitante" : toDisplayUser(user.email)}
         pendingOrders={pendingOrders ?? 0}
         storeName={store.name}
         storeSlug={store.slug}
-        storeLogoUrl={store.logo_url}
-        storeBrandColor={store.brand_color}
+        storeLogoUrl={store.logoUrl}
+        storeBrandColor={store.brandColor}
+        esDemo={esDemo}
       />
       {/* Espacio para la franja lateral de iconos */}
       <div className="pl-20">
-        <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-6">
+          {esDemo && <DemoBanner />}
+          {children}
+        </main>
       </div>
 
       <NewOrderAlert storeId={store.id} />

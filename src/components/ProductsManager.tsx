@@ -333,7 +333,14 @@ function ProductForm({
 
     if (upErr) {
       setUploading(false);
-      setError("No se pudo subir la imagen: " + upErr.message);
+      // En la demostración las subidas están cerradas a propósito, y el error
+      // que devuelve la base es de política de seguridad: sin traducirlo, el
+      // visitante leería algo que no le dice nada.
+      setError(
+        /row-level security|policy/i.test(upErr.message)
+          ? "Aquí no se pueden subir fotos. En la demostración está cerrado."
+          : "No se pudo subir la imagen: " + upErr.message
+      );
       return;
     }
 
