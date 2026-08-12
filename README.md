@@ -12,7 +12,7 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/login` | la entrada al panel. Cuelga de la raíz, no de `/admin`, porque es el enlace que se le pasa al tendero |
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
-| `/administrador` | tu administración: alta y suspensión de tiendas. Separada del panel de tienda |
+| `/administrador` | tu administración: alta y suspensión de tiendas. Se entra desde el menú de tu panel |
 | `/registro` | alta de una tienda con código de invitación, o canje del código si entró con un proveedor |
 | `/recuperar` | pedir el enlace para poner otra contraseña |
 | `/clave` | escribir la contraseña nueva |
@@ -280,12 +280,14 @@ recuperación funcionan a medias en cuanto haya varias tiendas.
 
 ## Conocer el panel sin tener cuenta
 
-Las dos administraciones están **separadas**:
+Tu cuenta entra a `/admin` como cualquier tendero -- es dueña de la tienda de
+demostración -- y desde el menú lateral tiene el atajo del escudo a
+`/administrador`, donde das de alta y suspendes tiendas. Las dos pantallas son
+dos caras de la misma cuenta y se salta de una a otra.
 
-| | Quién entra | Cómo |
-| --- | --- | --- |
-| `/administrador` | tú | con tu correo y contraseña. Si entras a `/admin`, el panel te devuelve aquí: desde tu cuenta no se atiende ninguna tienda |
-| `/admin` | un tendero | con las credenciales de su cuenta |
+Hubo un rato en que estaban separadas, con `/admin` devolviendo a
+`/administrador` a quien administra la plataforma. El resultado fue que la misma
+cuenta que es dueña de una tienda no podía llegar nunca a su panel.
 
 Al panel **no se entra sin cuenta**, y eso no se negocia: es el mismo panel que
 usan las tiendas de los clientes.

@@ -16,15 +16,15 @@ export default async function PanelLayout({
 
   if (!user) redirect("/login");
 
-  // Las dos administraciones están separadas: quien administra la plataforma no
-  // atiende ninguna tienda, así que este panel no es el suyo y se va al suyo.
+  // Quien administra la plataforma entra a este panel como cualquier tendero, y
+  // desde el menú tiene el atajo a su administración. Hubo un rato en que se le
+  // desviaba a `/administrador`, y el resultado fue que la misma cuenta que es
+  // dueña de una tienda no podía llegar nunca a su panel.
   const { data: esAdminPlataforma } = await supabase
     .from("platform_admins")
     .select("user_id")
     .eq("user_id", user.id)
     .maybeSingle();
-
-  if (esAdminPlataforma) redirect("/administrador");
 
   // Sin tienda no hay panel, pero sí hay salida: pasa cuando entra con Google,
   // Facebook o Apple y su correo no estaba reservado en la invitación, así que
@@ -61,6 +61,7 @@ export default async function PanelLayout({
         storeSlug={store.slug}
         storeLogoUrl={store.logoUrl}
         storeBrandColor={store.brandColor}
+        isPlatformAdmin={Boolean(esAdminPlataforma)}
       />
       {/* Espacio para la franja lateral de iconos */}
       <div className="pl-20">

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import {
   createInvite,
   setStorePublished,
@@ -98,13 +98,6 @@ export default function AdminPanel({
     router.refresh();
   }
 
-  async function salir() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
   function copiar(texto: string, marca: string) {
     void navigator.clipboard?.writeText(texto);
     setCopiado(marca);
@@ -122,14 +115,14 @@ export default function AdminPanel({
             <p className="text-sm font-bold">TU SUPERMARKET</p>
             <p className="text-xs text-neutral-500">Administrador</p>
           </div>
-          {/* Aquí había un atajo a "Mi tienda". Se quitó al separar las dos
-              administraciones: desde aquí no se atiende ninguna tienda. */}
-          <button
-            onClick={salir}
+          {/* El camino de vuelta: esta pantalla y el panel de la tienda son dos
+              caras de la misma cuenta, y se salta de una a otra. */}
+          <Link
+            href="/admin"
             className="rounded-lg border border-black/10 px-3 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-50"
           >
-            Salir
-          </button>
+            Mi tienda
+          </Link>
         </div>
       </header>
 
