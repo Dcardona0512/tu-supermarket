@@ -8,6 +8,7 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 
 | Ruta | Quién la usa |
 | --- | --- |
+| `/` | nadie en particular: redirige al acceso. Es también donde cae Supabase cuando no puede usar el destino que pide la aplicación |
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
 | `/plataforma` | la administración de la plataforma: alta y suspensión de tiendas |
