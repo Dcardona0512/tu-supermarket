@@ -114,7 +114,7 @@ export default function OrdersManager({
             onClick={() => setFilter(s.value)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               filter === s.value
-                ? "bg-brand text-white"
+                ? "bg-brand text-brand-text"
                 : "bg-white text-neutral-600 hover:bg-neutral-100"
             }`}
           >
@@ -202,7 +202,7 @@ export default function OrdersManager({
                               <p className="text-sm">
                                 <a
                                   href={`tel:${o.customer_phone}`}
-                                  className="text-brand-dark hover:underline"
+                                  className="text-brand-ink hover:underline"
                                 >
                                   {o.customer_phone}
                                 </a>
@@ -315,7 +315,7 @@ export default function OrdersManager({
                             }
                             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-40 ${
                               o.status === st
-                                ? "bg-brand text-white"
+                                ? "bg-brand text-brand-text"
                                 : "border border-black/10 text-neutral-700 hover:bg-white"
                             }`}
                           >
@@ -348,7 +348,7 @@ export default function OrdersManager({
                               onClick={() =>
                                 changeStatus(o.id, "entregado", m.value)
                               }
-                              className="rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-dark disabled:opacity-50"
+                              className="rounded-lg bg-brand px-4 py-2 text-xs font-semibold text-brand-text transition hover:bg-brand-dark disabled:opacity-50"
                             >
                               {m.label}
                             </button>

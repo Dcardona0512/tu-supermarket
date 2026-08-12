@@ -188,7 +188,7 @@ export default function PlatformDashboard({
 
           {nuevoCodigo && (
             <div className="mt-3 rounded-lg border border-brand/20 bg-brand/5 p-3">
-              <p className="text-xs font-semibold text-brand-dark">
+              <p className="text-xs font-semibold text-brand-ink">
                 Código listo. Pásaselo a la tienda junto con el enlace de
                 registro.
               </p>

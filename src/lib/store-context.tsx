@@ -26,6 +26,13 @@ export type StoreInfo = {
   address: string | null;
   /** Lo que cobra esta tienda por el domicilio, en pesos. */
   deliveryFee: number;
+  /**
+   * Marca de la última edición, para versionar el icono.
+   *
+   * El icono se cachea un año, así que sin algo que cambie en su URL el
+   * navegador seguiría mostrando el de antes de personalizar.
+   */
+  version: string;
 };
 
 const StoreContext = createContext<StoreInfo | null>(null);

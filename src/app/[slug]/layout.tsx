@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CartProvider } from "@/lib/cart";
 import { StoreProvider } from "@/lib/store-context";
 import { getStoreBySlug } from "@/lib/store";
-import { darken, readableText } from "@/lib/brand";
+import { darken, readableText, inkOnWhite } from "@/lib/brand";
 import StoreShell from "@/components/StoreShell";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -15,9 +15,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   // La pestaña del navegador lleva el nombre del negocio, no el de la
   // plataforma: es la tienda del tendero, no la nuestra.
+  //
+  // El icono lleva la versión de la tienda en la URL: sin ella, el navegador
+  // conservaría el de antes de personalizar durante un año.
+  const icono = `/${store.slug}/icono?v=${store.version}`;
+
   return {
     title: store.name,
     description: `Haz tu pedido en línea en ${store.name} y paga en efectivo o por transferencia al recibir.`,
+    icons: {
+      icon: [{ url: icono, type: "image/png", sizes: "64x64" }],
+      apple: [
+        { url: `${icono}&size=180`, type: "image/png", sizes: "180x180" },
+      ],
+    },
   };
 }
 
@@ -45,6 +56,8 @@ export default async function StoreLayout({
               // Si la tienda eligió un color claro, el texto encima pasa a
               // oscuro: si no, sus botones serían ilegibles.
               "--brand-text": readableText(store.brandColor),
+              // Y al contrario para los textos que van sobre el fondo claro
+              "--brand-ink": inkOnWhite(store.brandColor),
             } as React.CSSProperties
           }
         >

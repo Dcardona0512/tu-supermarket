@@ -52,11 +52,11 @@ export default function Catalog({
 
   return (
     <div>
-      <div className="mb-6 rounded-2xl bg-gradient-to-r from-brand to-brand-dark p-6 text-white">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-brand to-brand-dark p-6 text-brand-text">
         <h1 className="text-2xl font-bold sm:text-3xl">
           Haz tu mercado en línea
         </h1>
-        <p className="mt-1 max-w-xl text-sm text-white/90">
+        <p className="mt-1 max-w-xl text-sm text-brand-text/90">
           Elige tus productos y confirma tu pedido. Pagas en efectivo o por
           transferencia cuando lo recibas. Sin registro, es muy fácil.
         </p>
@@ -163,7 +163,7 @@ function SubChip({
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition ${
         active
-          ? "bg-brand/15 text-brand-dark"
+          ? "bg-brand/15 text-brand-ink"
           : "bg-white text-neutral-500 hover:bg-neutral-100"
       }`}
     >

@@ -93,12 +93,38 @@ export const PALETA = [
  * la luminancia relativa de la WCAG.
  */
 export function readableText(hex: string): "#ffffff" | "#111111" {
+  // Umbral donde el contraste con blanco y con negro se igualan
+  return luminancia(hex) > 0.36 ? "#111111" : "#ffffff";
+}
+
+/** Luminancia relativa (WCAG): 0 es negro, 1 es blanco. */
+function luminancia(hex: string): number {
   const [r, g, b] = toRgb(hex).map((c) => {
     const s = c / 255;
     return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
   }) as [number, number, number];
 
-  const luminancia = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  // Umbral donde el contraste con blanco y con negro se igualan
-  return luminancia > 0.36 ? "#111111" : "#ffffff";
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * El color de marca, oscurecido lo justo para poder leerse sobre fondo blanco.
+ *
+ * Es el problema inverso de `readableText`: ahí el color es el fondo, aquí es la
+ * tinta. Hace falta desde que el tendero puede elegir cualquier color con el
+ * pincel: un amarillo o un celeste de marca son buenos fondos de botón, pero
+ * escritos sobre blanco no se ven. Se oscurece a pasos hasta alcanzar el 4.5:1
+ * que pide la WCAG, así que un color ya oscuro se devuelve casi intacto y solo
+ * los claros se corrigen.
+ */
+export function inkOnWhite(hex: string): string {
+  let color = hex;
+  // 20 pasos del 8% llegan a negro desde cualquier color, así que el bucle
+  // siempre termina; en la práctica sale en los primeros.
+  for (let i = 0; i < 20; i++) {
+    // Contraste con blanco, cuya luminancia es 1
+    if ((1 + 0.05) / (luminancia(color) + 0.05) >= 4.5) return color;
+    color = darken(color, 0.08);
+  }
+  return "#111111";
 }

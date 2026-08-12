@@ -43,7 +43,7 @@ export default async function OrderConfirmationPage({
   return (
     <div className="mx-auto max-w-lg">
       <div className="rounded-2xl border border-black/5 bg-white p-6 text-center shadow-sm">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand/10 text-brand">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand/10 text-brand-ink">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 6 9 17l-5-5" />
           </svg>

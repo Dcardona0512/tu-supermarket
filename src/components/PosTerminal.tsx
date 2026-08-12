@@ -281,7 +281,7 @@ export default function PosTerminal({
             <ScanButton
               onDetected={handleScannedCode}
               title="Escanear producto"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-text transition hover:bg-brand-dark"
             />
           </div>
 
@@ -378,7 +378,7 @@ export default function PosTerminal({
                       </p>
                     </div>
                     {inTicket > 0 && (
-                      <span className="absolute right-1.5 top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-xs font-bold text-white">
+                      <span className="absolute right-1.5 top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-xs font-bold text-brand-text">
                         {inTicket}
                       </span>
                     )}
@@ -393,7 +393,7 @@ export default function PosTerminal({
         <aside className="h-fit rounded-xl border border-black/5 bg-white p-4 lg:sticky lg:top-20">
           {lastSale && (
             <div className="mb-4 rounded-lg bg-brand/5 p-3 text-sm">
-              <p className="font-semibold text-brand-dark">
+              <p className="font-semibold text-brand-ink">
                 Venta #{lastSale.number} registrada
               </p>
               <p className="text-neutral-600">
@@ -540,7 +540,7 @@ export default function PosTerminal({
             <button
               onClick={charge}
               disabled={submitting || items.length === 0}
-              className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:bg-neutral-300"
+              className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-brand-text transition hover:bg-brand-dark disabled:bg-neutral-300"
             >
               {submitting ? "Registrando..." : `Cobrar ${formatCOP(total)}`}
             </button>
@@ -574,7 +574,7 @@ function Chip({
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition ${
         active
-          ? "bg-brand text-white"
+          ? "bg-brand text-brand-text"
           : "bg-white text-neutral-600 hover:bg-neutral-100"
       }`}
     >
@@ -598,7 +598,7 @@ function SubChip({
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition ${
         active
-          ? "bg-brand/15 text-brand-dark"
+          ? "bg-brand/15 text-brand-ink"
           : "bg-white text-neutral-500 hover:bg-neutral-100"
       }`}
     >

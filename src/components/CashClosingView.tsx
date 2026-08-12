@@ -95,7 +95,7 @@ export default function CashClosingView({
             onClick={() => window.print()}
             disabled={pending || !data}
             title="Abre el diálogo de impresión; ahí eliges «Guardar como PDF»"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:bg-neutral-300"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-text transition hover:bg-brand-dark disabled:bg-neutral-300"
           >
             <PdfIcon />
             Descargar PDF

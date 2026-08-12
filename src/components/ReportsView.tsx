@@ -31,7 +31,7 @@ export default function ReportsView({
             onClick={() => setTab(t.value)}
             className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition ${
               tab === t.value
-                ? "bg-brand text-white"
+                ? "bg-brand text-brand-text"
                 : "text-neutral-600 hover:bg-neutral-100"
             }`}
           >

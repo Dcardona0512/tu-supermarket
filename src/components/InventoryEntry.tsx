@@ -225,7 +225,7 @@ export default function InventoryEntry({
             <ScanButton
               onDetected={handleScannedCode}
               title="Escanear mercancía"
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-text transition hover:bg-brand-dark"
             />
           </div>
 
@@ -342,7 +342,7 @@ export default function InventoryEntry({
             </p>
           )}
           {done && (
-            <p className="mt-3 rounded-lg bg-brand/5 px-3 py-2 text-sm font-medium text-brand-dark">
+            <p className="mt-3 rounded-lg bg-brand/5 px-3 py-2 text-sm font-medium text-brand-ink">
               {done}
             </p>
           )}
@@ -362,7 +362,7 @@ export default function InventoryEntry({
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:bg-neutral-300"
+                  className="rounded-lg bg-brand px-5 py-2 text-sm font-semibold text-brand-text hover:bg-brand-dark disabled:bg-neutral-300"
                 >
                   {saving
                     ? "Guardando..."
@@ -463,7 +463,7 @@ function ModeBtn({
       onClick={onClick}
       className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${
         active
-          ? "bg-brand text-white"
+          ? "bg-brand text-brand-text"
           : "text-neutral-600 hover:bg-neutral-100"
       }`}
     >

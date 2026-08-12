@@ -157,7 +157,7 @@ export default function CategoryManager({
           <button
             type="submit"
             disabled={busy || !newName.trim()}
-            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:bg-neutral-300"
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-text hover:bg-brand-dark disabled:bg-neutral-300"
           >
             Agregar
           </button>
@@ -245,7 +245,7 @@ export default function CategoryManager({
                     <button
                       type="submit"
                       disabled={busy || !subName.trim()}
-                      className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark disabled:bg-neutral-300"
+                      className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-text hover:bg-brand-dark disabled:bg-neutral-300"
                     >
                       Crear
                     </button>
@@ -267,7 +267,7 @@ export default function CategoryManager({
                       setSubName("");
                       setError(null);
                     }}
-                    className="mt-1 pl-3 text-xs font-medium text-brand-dark hover:underline"
+                    className="mt-1 pl-3 text-xs font-medium text-brand-ink hover:underline"
                   >
                     + Subcategoría
                   </button>
@@ -329,7 +329,7 @@ function Fila({
         <button
           onClick={onGuardar}
           disabled={busy}
-          className="text-xs font-medium text-brand-dark hover:underline"
+          className="text-xs font-medium text-brand-ink hover:underline"
         >
           Guardar
         </button>
@@ -370,7 +370,7 @@ function Fila({
       )}
       <button
         onClick={onRenombrar}
-        className="text-xs font-medium text-brand-dark hover:underline"
+        className="text-xs font-medium text-brand-ink hover:underline"
       >
         Renombrar
       </button>

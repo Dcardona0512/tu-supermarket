@@ -100,7 +100,7 @@ export default function ProductsManager({
           </button>
           <button
             onClick={openNew}
-            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-text hover:bg-brand-dark"
           >
             + Nuevo producto
           </button>
@@ -241,7 +241,7 @@ export default function ProductsManager({
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => openEdit(p)}
-                      className="mr-2 text-xs font-medium text-brand-dark hover:underline"
+                      className="mr-2 text-xs font-medium text-brand-ink hover:underline"
                     >
                       Editar
                     </button>
@@ -623,7 +623,7 @@ function ProductForm({
             <button
               type="submit"
               disabled={saving || uploading}
-              className="flex-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:bg-neutral-300"
+              className="flex-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-text hover:bg-brand-dark disabled:bg-neutral-300"
             >
               {saving ? "Guardando..." : "Guardar"}
             </button>

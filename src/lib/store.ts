@@ -14,10 +14,11 @@ type StoreRow = {
   address: string | null;
   delivery_fee: number;
   is_published: boolean;
+  updated_at: string;
 };
 
 const CAMPOS =
-  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published";
+  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published, updated_at";
 
 function toStoreInfo(row: StoreRow): StoreInfo {
   return {
@@ -31,6 +32,8 @@ function toStoreInfo(row: StoreRow): StoreInfo {
     phone: row.phone,
     address: row.address,
     deliveryFee: Number(row.delivery_fee),
+    // Sirve de número de versión del icono: cambia con cada guardado
+    version: String(Date.parse(row.updated_at) || 0),
   };
 }
 

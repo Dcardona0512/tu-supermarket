@@ -3,6 +3,7 @@ import AdminSidebar from "@/components/AdminSidebar";
 import NewOrderAlert from "@/components/NewOrderAlert";
 import { createClient } from "@/lib/supabase/server";
 import { toDisplayUser } from "@/lib/admin-user";
+import { darken, readableText, inkOnWhite } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,20 @@ export default async function PanelLayout({
     ]);
 
   return (
-    <div className="min-h-screen bg-neutral-100">
+    // El panel toma el color de la tienda, igual que su escaparate: el tendero
+    // lo elige una vez y lo ve en los dos sitios. La marca de la plataforma
+    // sigue en el texto del menú, no en el color.
+    <div
+      className="min-h-screen bg-neutral-100"
+      style={
+        {
+          "--brand": store.brand_color,
+          "--brand-dark": darken(store.brand_color),
+          "--brand-text": readableText(store.brand_color),
+          "--brand-ink": inkOnWhite(store.brand_color),
+        } as React.CSSProperties
+      }
+    >
       <AdminSidebar
         user={toDisplayUser(user.email)}
         pendingOrders={pendingOrders ?? 0}

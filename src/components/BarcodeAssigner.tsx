@@ -76,7 +76,7 @@ export default function BarcodeAssigner({ products }: { products: Product[] }) {
             onClick={() => setOnlyMissing((v) => !v)}
             className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition ${
               onlyMissing
-                ? "bg-brand text-white"
+                ? "bg-brand text-brand-text"
                 : "border border-black/10 text-neutral-600 hover:bg-neutral-50"
             }`}
           >

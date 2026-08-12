@@ -95,7 +95,7 @@ export default async function DashboardPage() {
             <h2 className="text-sm font-bold">Pedidos recientes</h2>
             <Link
               href="/admin/pedidos"
-              className="text-xs text-brand-dark hover:underline"
+              className="text-xs text-brand-ink hover:underline"
             >
               Ver todos
             </Link>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
               </h2>
               <Link
                 href="/admin/productos"
-                className="text-xs text-brand-dark hover:underline"
+                className="text-xs text-brand-ink hover:underline"
               >
                 Ver productos
               </Link>

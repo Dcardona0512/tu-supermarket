@@ -39,7 +39,7 @@ export default function CartDrawer() {
       <footer className="shrink-0 border-t border-black/5 bg-white px-4 py-2 text-center">
         <button
           onClick={closePanel}
-          className="text-xs font-medium text-brand-dark hover:underline"
+          className="text-xs font-medium text-brand-ink hover:underline"
         >
           Seguir escogiendo productos
         </button>

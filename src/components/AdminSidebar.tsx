@@ -145,7 +145,7 @@ export default function AdminSidebar({
                     title={l.label}
                     className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                       active
-                        ? "bg-brand/10 text-brand-dark"
+                        ? "bg-brand/10 text-brand-ink"
                         : "text-neutral-600 hover:bg-neutral-100"
                     } ${open ? "" : "justify-center px-0"}`}
                   >

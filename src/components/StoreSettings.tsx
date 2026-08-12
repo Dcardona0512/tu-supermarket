@@ -375,7 +375,7 @@ export default function StoreSettings({ store }: { store: StoreInfo }) {
         <button
           type="submit"
           disabled={saving || uploading}
-          className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:bg-neutral-300"
+          className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-text transition hover:bg-brand-dark disabled:bg-neutral-300"
         >
           {saving ? "Guardando..." : "Guardar cambios"}
         </button>

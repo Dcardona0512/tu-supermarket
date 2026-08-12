@@ -139,7 +139,7 @@ export default function NewOrderAlert({ storeId }: { storeId: string }) {
           className="rounded-xl border border-brand/30 bg-white p-4 shadow-xl"
         >
           <div className="flex items-start gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand/10 text-brand-dark">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand/10 text-brand-ink">
               <BellIcon />
             </span>
             <div className="min-w-0 flex-1">
@@ -167,7 +167,7 @@ export default function NewOrderAlert({ storeId }: { storeId: string }) {
           <Link
             href="/admin/pedidos"
             onClick={() => setAvisos((prev) => prev.filter((x) => x.id !== a.id))}
-            className="mt-3 block rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-white hover:bg-brand-dark"
+            className="mt-3 block rounded-lg bg-brand px-4 py-2 text-center text-sm font-semibold text-brand-text hover:bg-brand-dark"
           >
             Tomar la orden
           </Link>

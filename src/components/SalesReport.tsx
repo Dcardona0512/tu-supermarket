@@ -209,7 +209,7 @@ export default function SalesReportView({
 
         <button
           onClick={() => setShowTable((s) => !s)}
-          className="mt-3 text-xs font-medium text-brand-dark hover:underline"
+          className="mt-3 text-xs font-medium text-brand-ink hover:underline"
         >
           {showTable ? "Ocultar tabla" : "Ver tabla de datos"}
         </button>
