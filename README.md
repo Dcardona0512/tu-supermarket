@@ -311,6 +311,18 @@ prudencia genérica: un botón de subida abierto a internet es alojamiento grati
 para cualquiera en el almacenamiento del proyecto, y eso no lo arregla un botón
 de restaurar. Si lo intenta, la pantalla se lo dice con sus palabras.
 
+### Una sola definición de «la tienda de esta sesión»
+
+`set_store_id`, el disparador que rellena `store_id` al insertar en las cinco
+tablas de negocio, resolvía la tienda por su cuenta con `owner_id = auth.uid()`.
+Era la misma regla que `my_store_id()` escrita dos veces, y no se notó hasta que
+apareció un segundo caso: al visitante de la demostración las políticas le
+dejaban escribir, pero el disparador abortaba el insert con «No hay una tienda
+asociada a este usuario». No podía crear ni un producto ni una categoría.
+
+Ahora pregunta a `my_store_id()` como todo lo demás. Si alguna vez hace falta un
+tercer caso, se añade en un solo sitio.
+
 ### El botón de restaurar
 
 En el panel de la demo hay un aviso permanente con **Restaurar la
