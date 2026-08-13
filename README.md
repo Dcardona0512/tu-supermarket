@@ -169,6 +169,13 @@ es una elección: es tener dos llaves de la misma puerta.
 Se guarda en la misma operación que crea la tienda: si el usuario ya está tomado,
 el alta se aborta entera y no queda una cuenta a medias.
 
+Pero el texto de esa excepción **no llega al navegador**: Supabase la envuelve y
+el formulario recibía `{}`, que era lo que el tendero leía en pantalla. Así que
+antes de intentar el alta se comprueban las dos cosas con `invitacion_valida` y
+`usuario_disponible`, para poder decirle qué pasa. No sustituyen al disparador,
+que sigue siendo la puerta; solo permiten un aviso útil. Y si aun así vuelve algo
+irreconocible, se muestra en qué mirar en vez del `{}`.
+
 El acceso y la recuperación aceptan cualquiera de los dos: si el texto lleva
 arroba se usa tal cual, y si no, se traduce.
 
@@ -273,10 +280,29 @@ En *Authentication*, una sola vez por proyecto:
 3. **Email Templates → Confirm signup:**
 
    ```html
-   <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">
-     Confirmar mi cuenta
-   </a>
+   <h2>Confirma tu cuenta</h2>
+   <p>
+     <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">
+       Confirmar mi cuenta
+     </a>
+   </p>
+   <p>Para entrar a tu panel te sirve cualquiera de estos dos:</p>
+   <ul>
+     <li>Tu correo: <strong>{{ .Email }}</strong></li>
+     <li>Tu usuario: <strong>{{ .Data.usuario }}</strong></li>
+   </ul>
+   <p>
+     Con la contraseña que elegiste al registrarte. <strong>No la incluimos en
+     este correo</strong>: nadie más que tú la conoce, ni nosotros.
+   </p>
    ```
+
+   `{{ .Data }}` lee los metadatos de la cuenta, y el usuario viaja ahí desde el
+   registro. **La contraseña no está entre las variables disponibles, ni la
+   habrá**: Supabase guarda solo su hash. Y aunque se pudiera, un correo se queda
+   en la bandeja para siempre y al alcance de cualquiera que abra ese buzón o ese
+   celular, así que sería el eslabón más débil de todo el sistema. Lo que el
+   tendero necesita para no quedarse afuera es su usuario, y eso sí va.
 
 4. **Email Templates → Reset password:**
 

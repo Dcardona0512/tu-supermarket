@@ -443,6 +443,8 @@ export type Database = {
       }
       cash_closing: { Args: { p_date?: string }; Returns: Json }
       canjear_invitacion: { Args: { p_code: string }; Returns: Json }
+      invitacion_valida: { Args: { p_code: string }; Returns: boolean }
+      usuario_disponible: { Args: { p_usuario: string }; Returns: boolean }
       correo_de_usuario: { Args: { p_usuario: string }; Returns: string }
       es_sesion_demo: { Args: Record<string, never>; Returns: boolean }
       reset_demo: { Args: Record<string, never>; Returns: Json }

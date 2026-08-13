@@ -55,6 +55,27 @@ export default function RegistroForm() {
     setLoading(true);
     const supabase = createClient();
 
+    // Se comprueba antes de intentar el alta, y no por gusto: cuando el
+    // disparador de la base lanza su excepción, Supabase la envuelve y el texto
+    // no llega hasta aquí — el formulario recibía `{}` y eso era lo que el
+    // tendero leía en pantalla. Comprobando antes se le puede decir qué pasa.
+    // La puerta de verdad sigue siendo el disparador, que decide al crear.
+    const [{ data: codigoSirve }, { data: usuarioLibre }] = await Promise.all([
+      supabase.rpc("invitacion_valida", { p_code: codigo.trim().toUpperCase() }),
+      supabase.rpc("usuario_disponible", { p_usuario: usuario }),
+    ]);
+
+    if (codigoSirve === false) {
+      setLoading(false);
+      setError("Ese código no sirve: no existe, ya se usó o venció.");
+      return;
+    }
+    if (usuarioLibre === false) {
+      setLoading(false);
+      setError("Ese nombre de usuario ya lo tiene otra tienda. Elige otro.");
+      return;
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -96,12 +117,36 @@ export default function RegistroForm() {
         <h1 className="text-lg font-bold">Ya casi</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Te enviamos un correo a <strong>{email}</strong> para confirmar tu
-          cuenta. Ábrelo y el enlace te trae de vuelta al acceso, para que entres
-          con el correo y la contraseña que acabas de elegir.
+          cuenta. Ábrelo y el enlace te trae de vuelta al acceso.
+        </p>
+
+        {/* Sus dos llaves, juntas y a la vista. Es el momento en que puede
+            anotarlas; la contraseña no se muestra ni se manda por correo, que es
+            donde se quedaría para siempre al alcance de cualquiera. */}
+        <dl className="mt-4 space-y-1 rounded-lg bg-neutral-50 px-3 py-3 text-sm">
+          <div className="flex gap-2">
+            <dt className="w-20 shrink-0 text-xs text-neutral-500">
+              Tu correo
+            </dt>
+            <dd className="min-w-0 truncate font-medium">{email}</dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="w-20 shrink-0 text-xs text-neutral-500">
+              Tu usuario
+            </dt>
+            <dd className="min-w-0 truncate font-medium">{usuario}</dd>
+          </div>
+        </dl>
+        <p className="mt-2 text-xs text-neutral-500">
+          Con cualquiera de los dos entras, junto con la contraseña que acabas de
+          elegir. Esa contraseña no la guardamos ni te la mandamos por correo:
+          solo la sabes tú.
         </p>
         <p className="mt-2 text-xs text-neutral-500">
-          Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
+          Si el correo no llega en unos minutos, revisa la carpeta de correo no
+          deseado.
         </p>
+
         <Link
           href="/login"
           className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
@@ -243,6 +288,10 @@ export default function RegistroForm() {
 /**
  * Los errores de la base llegan como texto de excepción de Postgres. Se
  * traducen a algo que un tendero entienda.
+ *
+ * El último caso es el importante: cuando el disparador del alta lanza su
+ * excepción, Supabase la envuelve y aquí llega `{}` o un «Database error». Sin
+ * este remate, eso era lo que aparecía en pantalla.
  */
 function traducir(mensaje: string): string {
   if (mensaje.includes("no existe")) {
@@ -266,7 +315,14 @@ function traducir(mensaje: string): string {
   if (mensaje.toLowerCase().includes("already registered")) {
     return "Ya existe una cuenta con ese correo.";
   }
-  return mensaje;
+
+  // Nada reconocible: el texto de la base se quedó por el camino. Se dice lo que
+  // se sabe, que es en qué mirar, en vez de enseñar `{}`.
+  const limpio = mensaje.trim();
+  if (!limpio || limpio === "{}" || /database error|unexpected/i.test(limpio)) {
+    return "No se pudo crear tu tienda. Revisa el código y que el nombre de usuario no esté tomado.";
+  }
+  return limpio;
 }
 
 function Marco({ children }: { children: React.ReactNode }) {
