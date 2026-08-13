@@ -114,42 +114,13 @@ export default function RegistroForm() {
   if (listo === "confirmar") {
     return (
       <Marco>
-        <h1 className="text-lg font-bold">Ya casi</h1>
+        <h1 className="text-lg font-bold">Confirma tu correo</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Te enviamos un correo a <strong>{email}</strong> para confirmar tu
-          cuenta. Ábrelo y el enlace te trae de vuelta al acceso.
+          Te enviamos un enlace a <strong>{email}</strong>.
         </p>
-
-        {/* Sus dos llaves, juntas y a la vista. Es el momento en que puede
-            anotarlas; la contraseña no se muestra ni se manda por correo, que es
-            donde se quedaría para siempre al alcance de cualquiera. */}
-        <dl className="mt-4 space-y-1 rounded-lg bg-neutral-50 px-3 py-3 text-sm">
-          <div className="flex gap-2">
-            <dt className="w-20 shrink-0 text-xs text-neutral-500">
-              Tu correo
-            </dt>
-            <dd className="min-w-0 truncate font-medium">{email}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="w-20 shrink-0 text-xs text-neutral-500">
-              Tu usuario
-            </dt>
-            <dd className="min-w-0 truncate font-medium">{usuario}</dd>
-          </div>
-        </dl>
-        <p className="mt-2 text-xs text-neutral-500">
-          Con cualquiera de los dos entras, junto con la contraseña que acabas de
-          elegir. Esa contraseña no la guardamos ni te la mandamos por correo:
-          solo la sabes tú.
-        </p>
-        <p className="mt-2 text-xs text-neutral-500">
-          Si el correo no llega en unos minutos, revisa la carpeta de correo no
-          deseado.
-        </p>
-
         <Link
           href="/login"
-          className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+          className="mt-5 inline-block rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-text transition hover:bg-brand-dark"
         >
           Ir al acceso
         </Link>
@@ -214,7 +185,6 @@ export default function RegistroForm() {
             onChange={(e) =>
               setUsuario(e.target.value.toLowerCase().replace(/\s/g, ""))
             }
-            placeholder="autola50"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}

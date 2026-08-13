@@ -279,30 +279,25 @@ En *Authentication*, una sola vez por proyecto:
    sin hacerse.
 3. **Email Templates → Confirm signup:**
 
+   Asunto: `Confirma tu correo · TU SUPERMARKET`
+
    ```html
-   <h2>Confirma tu cuenta</h2>
+   <h2>Confirma tu correo</h2>
+   <p>Tu usuario es <strong>{{ .Data.usuario }}</strong>.</p>
    <p>
      <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">
-       Confirmar mi cuenta
+       Confirmar mi correo
      </a>
-   </p>
-   <p>Para entrar a tu panel te sirve cualquiera de estos dos:</p>
-   <ul>
-     <li>Tu correo: <strong>{{ .Email }}</strong></li>
-     <li>Tu usuario: <strong>{{ .Data.usuario }}</strong></li>
-   </ul>
-   <p>
-     Con la contraseña que elegiste al registrarte. <strong>No la incluimos en
-     este correo</strong>: nadie más que tú la conoce, ni nosotros.
    </p>
    ```
 
-   `{{ .Data }}` lee los metadatos de la cuenta, y el usuario viaja ahí desde el
-   registro. **La contraseña no está entre las variables disponibles, ni la
-   habrá**: Supabase guarda solo su hash. Y aunque se pudiera, un correo se queda
-   en la bandeja para siempre y al alcance de cualquiera que abra ese buzón o ese
-   celular, así que sería el eslabón más débil de todo el sistema. Lo que el
-   tendero necesita para no quedarse afuera es su usuario, y eso sí va.
+   La plantilla de fábrica está en inglés y no menciona el usuario. `{{ .Data }}`
+   lee los metadatos de la cuenta, y el usuario viaja ahí desde el registro.
+
+   **La contraseña no está entre las variables disponibles, ni la habrá**:
+   Supabase guarda solo su hash. Y aunque se pudiera, un correo se queda en la
+   bandeja para siempre y al alcance de cualquiera que abra ese buzón o ese
+   celular, así que sería el eslabón más débil de todo el sistema.
 
 4. **Email Templates → Reset password:**
 
