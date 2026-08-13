@@ -113,14 +113,13 @@ Abre http://localhost:3000
 
 No hay registro abierto: nadie entra sin permiso.
 
-1. En `/administrador`, generar un código de invitación con el nombre de la tienda y
-   su nombre corto, que es el que quedará en la URL y **no se puede cambiar
-   después**. El formulario muestra el enlace resultante mientras se escribe.
-2. Si sabes su correo, escribirlo ahí también. No es obligatorio, pero es lo que
-   le permite entrar con Google, Facebook o Apple sin escribir el código.
-3. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
-4. Él entra con **su propio correo y la contraseña que elija**, o con el
-   proveedor que prefiera. La plataforma nunca conoce esa contraseña.
+1. En `/administrador`, generar un código de invitación con el nombre de la tienda.
+   Es el único campo: el nombre corto que quedará en la URL sale de él y **no se
+   puede cambiar después**, así que el formulario muestra el enlace resultante
+   mientras se escribe.
+2. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
+3. Él elige con qué entrar —**su correo o un usuario**— y pone la contraseña que
+   quiera. La plataforma nunca conoce esa contraseña.
 
 El código lo valida la base de datos al crear la cuenta: si no sirve, el alta se
 aborta entera y no queda ningún usuario a medias. Cada código sirve una sola vez
@@ -140,6 +139,7 @@ blanco.
 | Forma | Qué necesita | Dónde aterriza |
 | --- | --- | --- |
 | Correo y contraseña | el código de invitación, escrito en `/registro` | el acceso, a escribir sus credenciales |
+| Usuario y contraseña | el código, eligiendo «un usuario» en vez de correo | su panel, de una vez: no hay correo que confirmar |
 | Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar | su panel |
 | Recuperar contraseña | `/recuperar` le manda un enlace a su correo | la pantalla de la contraseña nueva |
 
@@ -153,6 +153,33 @@ Los tres destinos son distintos a propósito:
 - Con un **proveedor** se entra derecho al panel: la identidad la acaba de
   comprobar Google, Facebook o Apple, y volver a pedir contraseña no tendría
   sentido cuando puede que ni tenga una.
+
+### Entrar con un usuario en vez de un correo
+
+Para el tendero que no tiene o no recuerda un correo. Elige «un usuario» al
+registrarse, escribe algo como `autola50`, y con eso entra.
+
+Supabase solo autentica con correos, así que el usuario se convierte en una
+dirección interna, `usuario@tusupermarket.com`, en
+[`toLoginEmail`](src/lib/admin-user.ts). El campo del acceso acepta las dos cosas:
+si lleva arroba se usa tal cual, y si no se le pone el dominio.
+
+Esa dirección no es un buzón, y ahí estaba el problema: con la confirmación de
+correo activada la cuenta habría nacido sin confirmar, el correo de confirmación
+se habría perdido en el vacío y **el tendero no habría podido entrar nunca**. Así
+que un disparador da por confirmadas las direcciones del dominio interno. No se
+salta ninguna comprobación: confirmar un correo sirve para demostrar que la
+dirección es de quien dice, y aquí no es de nadie — es un nombre de usuario
+disfrazado. Quien se registra con un correo de verdad sigue teniendo que
+confirmarlo, y en los dos casos hace falta un código de invitación válido.
+
+**Lo que se pierde:** sin correo no hay recuperación de contraseña. El enlace
+iría a una dirección que no existe. Si la olvida, solo la plataforma puede
+ayudarle. El formulario se lo advierte antes de que elija, no después.
+
+El dominio interno está escrito en `admin-user.ts` y en el disparador
+`confirmar_usuario_interno`. Si alguna vez cambia, hay que cambiarlo en los dos
+sitios.
 
 Los dos primeros llegan por el mismo `?code=`, así que cuál fue lo dice el propio
 usuario: `app_metadata.provider` vale `email` en las cuentas de correo y el nombre

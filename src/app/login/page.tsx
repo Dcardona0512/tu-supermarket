@@ -43,7 +43,7 @@ function LoginForm() {
 
     if (signInError) {
       setLoading(false);
-      setError("Correo o contraseña incorrectos.");
+      setError("Los datos no coinciden. Revisa tu correo o usuario y tu contraseña.");
       return;
     }
 
@@ -77,7 +77,7 @@ function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-xs font-medium text-neutral-600">
-              Correo
+              Correo o usuario
             </label>
             <input
               type="text"

@@ -7,6 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import AccesoProveedores from "@/components/AccesoProveedores";
 import ReglasClave from "@/components/ReglasClave";
 import { claveValida } from "@/lib/password";
+import { toLoginEmail } from "@/lib/admin-user";
+
+/** Lo que se acepta como nombre de usuario: sin espacios, sin arroba, sin tildes. */
+const USUARIO_VALIDO = /^[a-z0-9._-]{3,30}$/;
 
 /**
  * Alta de una tienda con código de invitación.
@@ -14,22 +18,42 @@ import { claveValida } from "@/lib/password";
  * El código llega por la URL cuando se comparte el enlace completo, y si no se
  * escribe a mano. Quien valida el código es la base de datos al crear la
  * cuenta: si no sirve, el alta se aborta entera y no queda usuario a medias.
+ *
+ * Se puede abrir la tienda de dos formas, y la diferencia importa:
+ *
+ *   - **con un correo:** hay que confirmarlo por un enlace, y después se puede
+ *     recuperar la contraseña sin ayuda de nadie.
+ *   - **con un usuario:** entra de inmediato, sin correo de por medio. Es para el
+ *     tendero que no tiene o no recuerda uno. El precio es que **no hay
+ *     recuperación de contraseña**: si la olvida, solo la plataforma puede
+ *     ayudarle.
  */
 export default function RegistroForm() {
   const router = useRouter();
   const params = useSearchParams();
 
+  const [modo, setModo] = useState<"correo" | "usuario">("correo");
   const [codigo, setCodigo] = useState(params.get("codigo") ?? "");
   const [email, setEmail] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listo, setListo] = useState<"entrar" | "confirmar" | null>(null);
 
+  const conUsuario = modo === "usuario";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (conUsuario && !USUARIO_VALIDO.test(usuario)) {
+      setError(
+        "El usuario va sin espacios ni arroba, entre 3 y 30 letras o números"
+      );
+      return;
+    }
 
     if (!claveValida(password)) {
       setError("La contraseña todavía no cumple lo que se pide debajo");
@@ -38,8 +62,17 @@ export default function RegistroForm() {
 
     setLoading(true);
     const supabase = createClient();
+
+    // Supabase solo autentica con correos, así que el usuario se convierte en una
+    // dirección interna. La base la reconoce por el dominio y da la cuenta por
+    // confirmada, porque ese buzón no existe y esperar un correo la dejaría sin
+    // poder entrar nunca.
+    const correoDeAcceso = conUsuario
+      ? toLoginEmail(usuario)
+      : email.trim().toLowerCase();
+
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+      email: correoDeAcceso,
       password,
       options: {
         // La base lee el código de aquí para validar la invitación y crear la
@@ -52,21 +85,44 @@ export default function RegistroForm() {
       },
     });
 
-    setLoading(false);
-
     if (signUpError) {
+      setLoading(false);
       setError(traducir(signUpError.message));
       return;
     }
 
-    // Con confirmación de correo activada no hay sesión todavía.
     if (data.session) {
+      setLoading(false);
       setListo("entrar");
       router.push("/admin");
       router.refresh();
-    } else {
-      setListo("confirmar");
+      return;
     }
+
+    // Sin sesión: con un correo de verdad toca confirmarlo. Con un usuario no hay
+    // nada que confirmar —la cuenta ya nació confirmada—, así que se entra en el
+    // acto. Se intenta y no se da por hecho: si algo faltara, se dice.
+    if (conUsuario) {
+      const { error: entrarError } = await supabase.auth.signInWithPassword({
+        email: correoDeAcceso,
+        password,
+      });
+      setLoading(false);
+
+      if (entrarError) {
+        setError(
+          "Tu tienda quedó creada, pero no se pudo entrar sola. Ve al acceso y entra con tu usuario."
+        );
+        return;
+      }
+      setListo("entrar");
+      router.push("/admin");
+      router.refresh();
+      return;
+    }
+
+    setLoading(false);
+    setListo("confirmar");
   }
 
   if (listo === "confirmar") {
@@ -119,21 +175,85 @@ export default function RegistroForm() {
           />
         </div>
 
+        {/* Con qué va a entrar. Se elige antes de escribirlo, porque las dos
+            opciones no son intercambiables después. */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-neutral-600">
-            Tu correo
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            autoCapitalize="none"
-            spellCheck={false}
-            required
-            className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-          />
+          <p className="mb-1 text-xs font-medium text-neutral-600">
+            ¿Con qué quieres entrar?
+          </p>
+          <div className="flex gap-1 rounded-lg bg-neutral-100 p-1">
+            <button
+              type="button"
+              onClick={() => setModo("correo")}
+              className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                !conUsuario
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500"
+              }`}
+            >
+              Mi correo
+            </button>
+            <button
+              type="button"
+              onClick={() => setModo("usuario")}
+              className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                conUsuario
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500"
+              }`}
+            >
+              Un usuario
+            </button>
+          </div>
         </div>
+
+        {conUsuario ? (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-neutral-600">
+              Tu usuario
+            </label>
+            <input
+              value={usuario}
+              onChange={(e) =>
+                setUsuario(e.target.value.toLowerCase().replace(/\s/g, ""))
+              }
+              placeholder="autola50"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              required
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            />
+            <p className="mt-1 text-xs text-neutral-400">
+              Sin espacios ni arroba. Es el nombre con el que entrarás.
+            </p>
+            {/* Que quede dicho antes de elegir, no después de olvidar la clave */}
+            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Sin correo no podrás recuperar la contraseña por tu cuenta. Si la
+              olvidas, tendrás que pedirnos ayuda.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-neutral-600">
+              Tu correo
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              required
+              className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            />
+            <p className="mt-1 text-xs text-neutral-400">
+              Te llegará un enlace para confirmarlo. Con correo puedes recuperar
+              tu contraseña cuando quieras.
+            </p>
+          </div>
+        )}
 
         <div>
           <label className="mb-1 block text-xs font-medium text-neutral-600">
