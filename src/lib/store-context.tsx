@@ -26,6 +26,22 @@ export type StoreInfo = {
   address: string | null;
   /** Lo que cobra esta tienda por el domicilio, en pesos. */
   deliveryFee: number;
+
+  /* Datos del negocio: los que van en un comprobante, no en el escaparate. */
+
+  /** Razón social, o el nombre del responsable si es persona natural. */
+  legalName: string | null;
+  docType: "CC" | "NIT" | null;
+  docNumber: string | null;
+  /** Dígito de verificación del NIT. Se calcula, no se escribe. */
+  docDv: string | null;
+  ivaResponsable: boolean;
+  city: string | null;
+  /** A dónde llegan las facturas del negocio. */
+  billingEmail: string | null;
+  /** Quién atiende, y su celular. Distinto del teléfono público de la tienda. */
+  ownerName: string | null;
+  ownerPhone: string | null;
   /**
    * Marca de la última edición, para versionar el icono.
    *

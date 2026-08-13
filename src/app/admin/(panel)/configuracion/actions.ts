@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireStore } from "@/lib/store";
+import { digitoVerificacion, soloDigitos } from "@/lib/documento";
 
 export type StoreSettingsInput = {
   name: string;
@@ -62,6 +63,76 @@ export async function updateStore(
     // El escaparate y la cabecera del panel muestran estos datos
     revalidatePath("/");
     revalidatePath("/admin");
+    revalidatePath("/admin/configuracion");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+export type DatosDelNegocioInput = {
+  legalName: string;
+  docType: "CC" | "NIT" | "";
+  docNumber: string;
+  ivaResponsable: boolean;
+  city: string;
+  billingEmail: string;
+  ownerName: string;
+  ownerPhone: string;
+};
+
+/**
+ * Guarda los datos con los que el negocio se identifica en un papel.
+ *
+ * Van aparte de la personalización porque son otra cosa: aquello es lo que ven
+ * los clientes, esto es lo que va en un comprobante y, más adelante, en una
+ * factura. Separarlos evita que la lista de campos permitidos crezca hasta
+ * volverse imposible de revisar.
+ *
+ * El dígito de verificación no se recibe: se calcula. Es un dato que se deduce
+ * del NIT, y aceptarlo del formulario solo abriría la puerta a guardarlo mal.
+ */
+export async function updateDatosDelNegocio(
+  input: DatosDelNegocioInput
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const { supabase, store } = await requireStore();
+
+    const tipo = input.docType === "CC" || input.docType === "NIT"
+      ? input.docType
+      : null;
+    const numero = soloDigitos(input.docNumber);
+
+    if (numero && !tipo) {
+      return { ok: false, error: "Elige si es cédula o NIT" };
+    }
+    if (numero && numero.length > 15) {
+      return { ok: false, error: "Ese número de documento es demasiado largo" };
+    }
+
+    const correo = input.billingEmail.trim().toLowerCase();
+    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      return { ok: false, error: "Ese correo no parece válido" };
+    }
+
+    const { error } = await supabase
+      .from("stores")
+      .update({
+        legal_name: input.legalName.trim() || null,
+        doc_type: numero ? tipo : null,
+        doc_number: numero || null,
+        // Solo el NIT lleva dígito de verificación; una cédula no tiene.
+        doc_dv: numero && tipo === "NIT" ? digitoVerificacion(numero) : null,
+        iva_responsable: input.ivaResponsable,
+        city: input.city.trim() || null,
+        billing_email: correo || null,
+        owner_name: input.ownerName.trim() || null,
+        owner_phone: input.ownerPhone.trim() || null,
+      })
+      .eq("id", store.id);
+
+    if (error) return { ok: false, error: error.message };
+
     revalidatePath("/admin/configuracion");
     return { ok: true };
   } catch (e) {

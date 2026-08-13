@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import StoreSettings from "@/components/StoreSettings";
+import DatosDelNegocio from "@/components/DatosDelNegocio";
 import CambiarClave from "@/components/CambiarClave";
 import type { StoreInfo } from "@/lib/store-context";
 
 const PESTANAS = [
   { valor: "tienda", label: "Mi tienda" },
+  { valor: "negocio", label: "Datos del negocio" },
   { valor: "cuenta", label: "Mi cuenta" },
 ] as const;
 
@@ -46,9 +48,11 @@ export default function Configuracion({
         ))}
       </div>
 
-      {pestana === "tienda" ? (
-        <StoreSettings store={store} />
-      ) : (
+      {pestana === "tienda" && <StoreSettings store={store} />}
+
+      {pestana === "negocio" && <DatosDelNegocio store={store} />}
+
+      {pestana === "cuenta" && (
         <div>
           <div className="mb-5">
             <h1 className="text-xl font-bold">Mi cuenta</h1>

@@ -349,14 +349,23 @@ export type Database = {
       stores: {
         Row: {
           address: string | null
+          billing_email: string | null
           brand_color: string
+          city: string | null
           created_at: string
           delivery_fee: number
+          doc_dv: string | null
+          doc_number: string | null
+          doc_type: string | null
           id: string
           is_published: boolean
+          iva_responsable: boolean
+          legal_name: string | null
           logo_url: string | null
           name: string
           owner_id: string
+          owner_name: string | null
+          owner_phone: string | null
           phone: string | null
           slug: string
           tagline: string | null
@@ -364,14 +373,23 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          billing_email?: string | null
           brand_color?: string
+          city?: string | null
           created_at?: string
           delivery_fee?: number
+          doc_dv?: string | null
+          doc_number?: string | null
+          doc_type?: string | null
           id?: string
           is_published?: boolean
+          iva_responsable?: boolean
+          legal_name?: string | null
           logo_url?: string | null
           name: string
           owner_id: string
+          owner_name?: string | null
+          owner_phone?: string | null
           phone?: string | null
           slug: string
           tagline?: string | null
@@ -379,14 +397,23 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          billing_email?: string | null
           brand_color?: string
+          city?: string | null
           created_at?: string
           delivery_fee?: number
+          doc_dv?: string | null
+          doc_number?: string | null
+          doc_type?: string | null
           id?: string
           is_published?: boolean
+          iva_responsable?: boolean
+          legal_name?: string | null
           logo_url?: string | null
           name?: string
           owner_id?: string
+          owner_name?: string | null
+          owner_phone?: string | null
           phone?: string | null
           slug?: string
           tagline?: string | null

@@ -15,10 +15,24 @@ type StoreRow = {
   delivery_fee: number;
   is_published: boolean;
   updated_at: string;
+  legal_name: string | null;
+  doc_type: string | null;
+  doc_number: string | null;
+  doc_dv: string | null;
+  iva_responsable: boolean;
+  city: string | null;
+  billing_email: string | null;
+  owner_name: string | null;
+  owner_phone: string | null;
 };
 
+/**
+ * Va en una sola línea a propósito, por larga que sea: si se parte con `+`,
+ * TypeScript deja de verla como literal y el cliente de Supabase ya no puede
+ * deducir la forma de la fila.
+ */
 const CAMPOS =
-  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published, updated_at";
+  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published, updated_at, legal_name, doc_type, doc_number, doc_dv, iva_responsable, city, billing_email, owner_name, owner_phone";
 
 function toStoreInfo(row: StoreRow): StoreInfo {
   return {
@@ -32,6 +46,15 @@ function toStoreInfo(row: StoreRow): StoreInfo {
     phone: row.phone,
     address: row.address,
     deliveryFee: Number(row.delivery_fee),
+    legalName: row.legal_name,
+    docType: (row.doc_type as "CC" | "NIT" | null) ?? null,
+    docNumber: row.doc_number,
+    docDv: row.doc_dv,
+    ivaResponsable: row.iva_responsable,
+    city: row.city,
+    billingEmail: row.billing_email,
+    ownerName: row.owner_name,
+    ownerPhone: row.owner_phone,
     // Sirve de número de versión del icono: cambia con cada guardado
     version: String(Date.parse(row.updated_at) || 0),
   };
