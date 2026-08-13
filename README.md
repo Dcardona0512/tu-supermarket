@@ -17,7 +17,6 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/recuperar` | pedir el enlace para poner otra contraseña |
 | `/clave` | escribir la contraseña nueva |
 | `/auth/confirmar` | aterrizaje de los correos y de Google, Facebook y Apple |
-| `/demo/panel` | una muestra del panel, abierta sin cuenta. Solo existe para la tienda de demostración |
 
 ## Cambiar el dominio
 
@@ -48,7 +47,7 @@ que relacione cada dominio con su tienda.
 - Búsqueda y filtro por categoría y subcategoría.
 - Carrito persistente (localStorage).
 - Checkout contra entrega con formulario (nombre, celular, dirección) y confirmación con número de pedido.
-- Enlace al panel en el pie de página, para que el tendero entre desde su propia tienda. En la demostración, además, un botón para conocer el panel sin tener cuenta.
+- Enlace al panel en el pie de página, para que el tendero entre desde su propia tienda.
 
 ### Dashboard (administrador)
 - Acceso con usuario y contraseña.
@@ -278,57 +277,29 @@ Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
 correos por hora y suele caer en no deseado. Sin él, la confirmación y la
 recuperación funcionan a medias en cuanto haya varias tiendas.
 
-## Conocer el panel sin tener cuenta
+## Las dos pantallas de tu cuenta
 
-Tu cuenta entra a `/admin` como cualquier tendero -- es dueña de la tienda de
-demostración -- y desde el menú lateral tiene el atajo del escudo a
-`/administrador`, donde das de alta y suspendes tiendas. Las dos pantallas son
-dos caras de la misma cuenta y se salta de una a otra.
+Tu cuenta entra a `/admin` como cualquier tendero —es dueña de la tienda de
+demostración— y desde el menú lateral tiene el atajo del escudo a
+`/administrador`, donde das de alta y suspendes tiendas. Son dos caras de la
+misma cuenta y se salta de una a otra.
 
 Hubo un rato en que estaban separadas, con `/admin` devolviendo a
 `/administrador` a quien administra la plataforma. El resultado fue que la misma
 cuenta que es dueña de una tienda no podía llegar nunca a su panel.
 
 Al panel **no se entra sin cuenta**, y eso no se negocia: es el mismo panel que
-usan las tiendas de los clientes.
+usan las tiendas de los clientes. El pie del escaparate lleva un único enlace,
+**Entrar al panel**, que va al acceso.
 
-Para que un tendero interesado pueda verlo, el pie de la tienda de demostración
-lleva **dos botones**:
-
-- **Conocer el panel** → `/demo/panel`. Una muestra que se abre sin cuenta.
-- **Entrar al panel** → `/login`. El acceso normal.
-
-En el escaparate de un cliente solo aparece el segundo. El panel de un cliente no
-se enseña, y `/mi-tienda/panel` responde 404 en cualquier tienda que no sea la
-demostración.
-
-### La muestra no es el panel
-
-`/demo/panel` es una página que **retrata** el panel. No tiene un solo control que
-escriba —cero formularios, cero campos, cero botones de acción, comprobado en el
-navegador—, no abre sesión y no necesita ningún permiso nuevo. No hay nada que un
-visitante pueda estropear, así que tampoco hace falta un botón de restaurar.
-
-Lo único real son los **productos y las categorías**, que ya son públicos porque
-los muestra el escaparate. Los pedidos y los números del resumen son de ejemplo:
-los pedidos no son públicos y no se van a hacer públicos para una demostración.
-
-### Por qué no es el panel de verdad
-
-Se intentaron los dos caminos para que un visitante administrara la demo con el
-panel real, y los dos exigían tocar `my_store_id()`, la función de la que cuelgan
-las políticas de las cinco tablas de negocio, las del bucket y cuatro funciones —
-es decir, todo el aislamiento entre tiendas:
-
-1. **Sesiones anónimas de Supabase.** La más limpia: una función cambia y ninguna
-   política. Quedó descartada porque hay que habilitarlas en el panel de control
-   del proyecto.
-2. **Permisos al rol público, acotados a la demo.** Seis políticas con el
-   identificador de la demo escrito dentro. Quedó descartada por decisión del
-   dueño: no vale arriesgar los datos de sus clientes para enseñar una pantalla.
-
-Ambas están probadas y documentadas en el historial de git por si alguna vez
-cambia el criterio. Lo que hay hoy no toca el aislamiento en absoluto.
+Se probaron tres formas de enseñarlo a un tendero interesado sin darle cuenta, y
+las tres se descartaron. Las dos primeras —sesiones anónimas de Supabase, y
+permisos al rol público acotados a la demostración— exigían tocar `my_store_id()`,
+la función de la que cuelgan las políticas de las cinco tablas de negocio, las del
+bucket y cuatro funciones: todo el aislamiento entre tiendas. La tercera fue una
+página que retrataba el panel con datos de muestra, sin permisos ni sesión, y se
+quitó por decisión del dueño. Están todas en el historial de git por si algún día
+cambia el criterio.
 
 ### Una sola definición de «la tienda de esta sesión»
 
@@ -340,27 +311,6 @@ dos definiciones dejaron de coincidir: las políticas dejaban escribir y el
 disparador abortaba el insert.
 
 Ahora pregunta a `my_store_id()` como todo lo demás.
-
-### El nombre corto de la demostración
-
-Vive en [`src/lib/demo.ts`](src/lib/demo.ts), un módulo sin `"use client"` ni
-importaciones de servidor, porque lo necesitan los dos lados: el escaparate —de
-cliente— para saber que su pie lleva el botón, y la muestra —de servidor— para
-responder solo a esta tienda.
-
-Estuvo un rato en `store-context.tsx`, que es de cliente, y desde el servidor
-llegaba `undefined`: Next sustituye los módulos de cliente por una referencia
-cuando los importa el servidor, y las constantes se quedan por el camino. El
-síntoma era un 404 sin ningún error en el registro.
-
-### Y las páginas del escaparate van en un grupo
-
-Los archivos de la tienda viven en `src/app/[slug]/(tienda)/`, con su layout
-dentro. El paréntesis no aparece en la dirección: `/mi-tienda` y
-`/mi-tienda/carrito` siguen igual. Está así para que `/demo/panel`, que es
-hermano del grupo y no hijo, **no herede la barra de la tienda**: la muestra se
-dibujaba con el encabezado y el botón del carrito encima, y eso rompía justo la
-ilusión que la página busca dar.
 
 ## Catálogo de ejemplo
 
