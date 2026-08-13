@@ -257,72 +257,73 @@ en *Authentication → Sign In / Providers → Email*:
 
 Son justo las mismas cinco, para que la pantalla y la base no se contradigan.
 
-### Ajustes de Supabase que hay que dejar puestos
+### Lo único que hay que dejar puesto en Supabase
 
-En *Authentication*, una sola vez por proyecto:
+**Dos plantillas de correo, y nada más.** En *Authentication → Email Templates*:
 
-1. **URL Configuration → Site URL:** el dominio de producción,
-   `https://tusupermarket.vercel.app`. De fábrica viene `http://localhost:3000`, y
-   ese es el valor al que Supabase manda al tendero **cuando no puede usar el
-   destino que pide la aplicación**. Es el síntoma clásico: el correo llega bien,
-   la cuenta se confirma bien, y el enlace lo lleva a localhost.
-2. **URL Configuration → Redirect URLs:** añadir
+**Confirm signup** — asunto `Confirma tu correo · TU SUPERMARKET`:
 
-   ```
-   https://EL-DOMINIO/auth/confirmar**
-   http://localhost:3000/auth/confirmar**
-   ```
+```html
+<h2>Confirma tu correo</h2>
+<p>Tu usuario es <strong>{{ .Data.usuario }}</strong>.</p>
+<p>
+  <a href="https://tusupermarket.vercel.app/auth/confirmar?token_hash={{ .TokenHash }}&type=email">
+    Confirmar mi correo
+  </a>
+</p>
+```
 
-   El `**` del final hace falta porque el enlace de recuperación lleva
-   `?next=/clave`. Sin estas entradas Supabase ignora el destino que manda
-   la aplicación y devuelve al Site URL — o sea, a localhost si el paso 1 sigue
-   sin hacerse.
-3. **Email Templates → Confirm signup:**
+**Reset password** — asunto `Cambia tu contraseña · TU SUPERMARKET`:
 
-   Asunto: `Confirma tu correo · TU SUPERMARKET`
+```html
+<h2>Cambia tu contraseña</h2>
+<p>
+  <a href="https://tusupermarket.vercel.app/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery">
+    Poner una contraseña nueva
+  </a>
+</p>
+```
 
-   ```html
-   <h2>Confirma tu correo</h2>
-   <p>Tu usuario es <strong>{{ .Data.usuario }}</strong>.</p>
-   <p>
-     <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">
-       Confirmar mi correo
-     </a>
-   </p>
-   ```
+#### Por qué la dirección va escrita completa
 
-   La plantilla de fábrica está en inglés y no menciona el usuario. `{{ .Data }}`
-   lee los metadatos de la cuenta, y el usuario viaja ahí desde el registro.
+Es lo que hace que **el Site URL y la lista de redirecciones dejen de importar**.
 
-   **La contraseña no está entre las variables disponibles, ni la habrá**:
-   Supabase guarda solo su hash. Y aunque se pudiera, un correo se queda en la
-   bandeja para siempre y al alcance de cualquiera que abra ese buzón o ese
-   celular, así que sería el eslabón más débil de todo el sistema.
+La plantilla de fábrica usa `{{ .ConfirmationURL }}`: un enlace al propio
+Supabase que valida el token y **luego redirige** a donde diga `redirect_to`. Y
+ahí es donde se rompía: si ese destino no está en la lista blanca, Supabase lo
+descarta y usa el Site URL, que de fábrica es `http://localhost:3000`. El tendero
+recibía su correo, hacía clic, y acababa en una página que no existe.
 
-4. **Email Templates → Reset password:**
+Con la dirección escrita completa, Supabase no redirige nada: el correo lleva al
+tendero directo a tu sitio, y es tu servidor el que valida el `token_hash`
+llamando a `verifyOtp`. No hay redirección que permitir ni Site URL que consultar.
 
-   ```html
-   <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">
-     Poner una contraseña nueva
-   </a>
-   ```
+De paso resuelve otro problema: la plantilla de fábrica manda un enlace del flujo
+PKCE, cuyo verificador vive en las cookies del navegador donde se hizo el
+registro. Si el tendero se registra en el computador de la tienda y abre el correo
+en el celular, ese enlace falla. Con `TokenHash` la validación es entera del
+servidor y sirve desde cualquier equipo.
 
-   Ojo al `&` en vez de `?`: esa dirección ya lleva `?next=/clave`. Si se
-   escribe de la otra forma también funciona, porque la ruta deduce el destino
-   del `type=recovery`.
+`{{ .Data }}` lee los metadatos de la cuenta, y el usuario viaja ahí desde el
+registro. **La contraseña no está entre las variables disponibles, ni la habrá**:
+Supabase guarda solo su hash. Y aunque se pudiera, un correo se queda en la
+bandeja para siempre y al alcance de cualquiera que abra ese buzón, así que sería
+el eslabón más débil de todo el sistema.
 
-Las plantillas usan `{{ .RedirectTo }}` y no `{{ .SiteURL }}` porque la
-aplicación manda el destino en cada petición; con `SiteURL` se perdería el
-`next`.
+**Al cambiar de dominio hay que actualizar esas dos plantillas**, porque la
+dirección va escrita dentro. Es el precio de no depender de la configuración.
 
-Los pasos 3 y 4 importan más de lo que parecen. La plantilla de fábrica manda un
-enlace del flujo PKCE, cuyo verificador vive en las cookies del navegador donde
-se pidió: si el tendero se registra en el computador de la tienda y abre el correo
-en el celular, el enlace falla. Con `TokenHash` la validación es entera del
-servidor y funciona desde cualquier equipo. La ruta acepta las dos formas, así que
-nada se rompe mientras las plantillas sigan sin cambiar.
+#### Opcionales
 
-Queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
+Nada de esto hace falta para que funcione, pero conviene:
+
+| Dónde | Qué | Para qué |
+| --- | --- | --- |
+| URL Configuration | **Site URL** → `https://tusupermarket.vercel.app` | es a donde cae Supabase si algún día un enlace no puede usar su destino. Hoy la raíz ya recoge esos casos y los pasa al acceso con el motivo, pero mejor que apunte al sitio bueno |
+| URL Configuration | **Redirect URLs** → `https://tusupermarket.vercel.app/auth/confirmar**` y `http://localhost:3000/auth/confirmar**` | solo para el flujo PKCE y para probar en local |
+| Providers → Email | **Minimum password length** 8 y **Password Requirements** con mayúsculas, minúsculas, dígitos y símbolos | las mismas cinco reglas que ya valida la pantalla, exigidas también por la base |
+
+Y queda pendiente un **SMTP propio**: el de pruebas de Supabase manda unos pocos
 correos por hora y suele caer en no deseado. Sin él, la confirmación y la
 recuperación funcionan a medias en cuanto haya varias tiendas.
 
