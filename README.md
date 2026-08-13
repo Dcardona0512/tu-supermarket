@@ -57,7 +57,7 @@ que relacione cada dominio con su tienda.
 - Punto de venta (POS) con lector de código de barras.
 - Entradas de inventario, informes de ventas y cierre de caja.
 - Gestión de pedidos: detalle del cliente y cambio de estado (pendiente → entregado / cancelado).
-- **Configuración**, en tres pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y domicilio, con vista previa en vivo), *Datos del negocio* (razón social, cédula o NIT con su dígito de verificación calculado, responsable de IVA, ciudad, correo de facturas y quién atiende) y *Mi cuenta* (sus dos formas de entrar a la vista, y cambiar la contraseña pidiendo la actual).
+- **Configuración**, en tres pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y domicilio, con vista previa en vivo), *Datos del negocio* (razón social, cédula o NIT con su dígito de verificación calculado, responsable de IVA, ciudad, correo de facturas y quién atiende) y *Mi cuenta* (correo, usuario y desde cuándo es cliente, más cambiar la contraseña pidiendo la actual).
 
 ## La marca de cada tienda
 

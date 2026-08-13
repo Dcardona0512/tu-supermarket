@@ -25,6 +25,7 @@ type StoreRow = {
   owner_name: string | null;
   owner_phone: string | null;
   username: string | null;
+  created_at: string;
 };
 
 /**
@@ -33,7 +34,7 @@ type StoreRow = {
  * deducir la forma de la fila.
  */
 const CAMPOS =
-  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published, updated_at, legal_name, doc_type, doc_number, doc_dv, iva_responsable, city, billing_email, owner_name, owner_phone, username";
+  "id, slug, name, brand_color, logo_url, tagline, phone, address, delivery_fee, is_published, updated_at, legal_name, doc_type, doc_number, doc_dv, iva_responsable, city, billing_email, owner_name, owner_phone, username, created_at";
 
 function toStoreInfo(row: StoreRow): StoreInfo {
   return {
@@ -57,6 +58,7 @@ function toStoreInfo(row: StoreRow): StoreInfo {
     ownerName: row.owner_name,
     ownerPhone: row.owner_phone,
     username: row.username,
+    createdAt: row.created_at,
     // Sirve de número de versión del icono: cambia con cada guardado
     version: String(Date.parse(row.updated_at) || 0),
   };

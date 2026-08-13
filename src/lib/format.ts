@@ -20,3 +20,20 @@ export function formatDate(value: string | Date): string {
   const d = typeof value === "string" ? new Date(value) : value;
   return dateFormatter.format(d);
 }
+
+const dayFormatter = new Intl.DateTimeFormat("es-CO", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+/**
+ * Solo el día, sin hora: "13 de agosto de 2026".
+ *
+ * `formatDate` lleva la hora, que es lo que hace falta en un pedido o en un
+ * cierre de caja. Para una fecha de alta la hora es ruido.
+ */
+export function formatDay(value: string | Date): string {
+  const d = typeof value === "string" ? new Date(value) : value;
+  return dayFormatter.format(d);
+}

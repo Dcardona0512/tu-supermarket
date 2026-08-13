@@ -3,6 +3,7 @@
 import { useState } from "react";
 import StoreSettings from "@/components/StoreSettings";
 import DatosDelNegocio from "@/components/DatosDelNegocio";
+import DatosDeLaCuenta from "@/components/DatosDeLaCuenta";
 import CambiarClave from "@/components/CambiarClave";
 import type { StoreInfo } from "@/lib/store-context";
 
@@ -60,7 +61,14 @@ export default function Configuracion({
               Con qué entras a tu panel.
             </p>
           </div>
-          <CambiarClave correo={correo} usuario={store.username} />
+          <div className="space-y-4">
+            <DatosDeLaCuenta
+              correo={correo}
+              usuario={store.username}
+              desde={store.createdAt}
+            />
+            <CambiarClave correo={correo} />
+          </div>
         </div>
       )}
     </div>

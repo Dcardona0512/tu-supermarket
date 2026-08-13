@@ -44,6 +44,8 @@ export type StoreInfo = {
   ownerPhone: string | null;
   /** Nombre de usuario del dueño: la otra forma de entrar, además del correo. */
   username: string | null;
+  /** Cuándo se abrió la tienda. En ISO; se formatea al mostrarla. */
+  createdAt: string;
   /**
    * Marca de la última edición, para versionar el icono.
    *
