@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { compressImage, formatBytes, LOGO_SIDE } from "@/lib/image";
 import { initials, darken, readableText, PALETA } from "@/lib/brand";
 import { formatCOP } from "@/lib/format";
-import { updateStore } from "@/app/admin/(panel)/tienda/actions";
+import { updateStore } from "@/app/admin/(panel)/configuracion/actions";
 import type { StoreInfo } from "@/lib/store-context";
 
 /**

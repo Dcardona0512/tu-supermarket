@@ -62,7 +62,7 @@ export async function updateStore(
     // El escaparate y la cabecera del panel muestran estos datos
     revalidatePath("/");
     revalidatePath("/admin");
-    revalidatePath("/admin/tienda");
+    revalidatePath("/admin/configuracion");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };

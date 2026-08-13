@@ -12,6 +12,7 @@ gestionarlo. Los pedidos son con **pago contra entrega**, sin pasarela de pagos.
 | `/login` | la entrada al panel. Cuelga de la raíz, no de `/admin`, porque es el enlace que se le pasa al tendero |
 | `/mi-tienda` | los clientes de esa tienda: catálogo, carrito y confirmación |
 | `/admin` | el dueño de la tienda; se resuelve por su sesión, sin nombre en la URL |
+| `/admin/configuracion` | su tienda y su cuenta: marca, datos de contacto y contraseña |
 | `/administrador` | tu administración: alta y suspensión de tiendas. Se entra desde el menú de tu panel |
 | `/registro` | alta de una tienda con código de invitación, o canje del código si entró con un proveedor |
 | `/recuperar` | pedir el enlace para poner otra contraseña |
@@ -30,7 +31,7 @@ mudarse de dominio **no toca código**:
    compartidos.
 
 El panel no lleva el dominio escrito en ninguna parte: el enlace que se muestra
-al tendero en *Personalizar tienda* y el de registro se arman con el dominio
+al tendero en *Configuración* y el de registro se arman con el dominio
 desde el que se está navegando. En cuanto el dominio nuevo responda, el panel
 mostrará el enlace correcto sin desplegar nada.
 
@@ -56,7 +57,7 @@ que relacione cada dominio con su tienda.
 - Punto de venta (POS) con lector de código de barras.
 - Entradas de inventario, informes de ventas y cierre de caja.
 - Gestión de pedidos: detalle del cliente y cambio de estado (pendiente → entregado / cancelado).
-- **Personalizar tienda**: nombre, frase, logo, color, teléfono, dirección y valor del domicilio, con vista previa en vivo.
+- **Configuración**, en dos pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y valor del domicilio, con vista previa en vivo) y *Mi cuenta* (cambiar la contraseña, pidiendo la actual).
 
 ## La marca de cada tienda
 

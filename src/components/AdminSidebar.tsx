@@ -24,7 +24,7 @@ const LINKS: NavLink[] = [
   { href: "/admin/productos", label: "Productos", icon: <IconTag /> },
   { href: "/admin/pedidos", label: "Pedidos", icon: <IconList /> },
   { href: "/admin/informes", label: "Informes", icon: <IconChart /> },
-  { href: "/admin/tienda", label: "Personalizar tienda", icon: <IconPaint /> },
+  { href: "/admin/configuracion", label: "Configuración", icon: <IconGear /> },
 ];
 
 /**
@@ -323,12 +323,12 @@ function IconShield() {
   );
 }
 
-/** Brocha: personalizar el aspecto de la tienda. */
-function IconPaint() {
+/** Engranaje: la configuración de la tienda y de la cuenta. */
+function IconGear() {
   return (
     <svg {...svgProps()}>
-      <path d="M19 3H5a2 2 0 0 0-2 2v4h18V5a2 2 0 0 0-2-2Z" />
-      <path d="M13 9v4a2 2 0 0 1-2 2h-1v3a2 2 0 0 0 4 0v-3" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
     </svg>
   );
 }
