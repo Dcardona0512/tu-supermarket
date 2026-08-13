@@ -16,7 +16,14 @@ import { claveValida } from "@/lib/password";
  * Las reglas de la contraseña nueva son las mismas del registro, del mismo
  * archivo, para que no pueda pasar aquí lo que allá se rechaza.
  */
-export default function CambiarClave({ correo }: { correo: string }) {
+export default function CambiarClave({
+  correo,
+  usuario,
+}: {
+  correo: string;
+  /** Su nombre de usuario, si tiene: la otra forma de entrar. */
+  usuario: string | null;
+}) {
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
   const [repetida, setRepetida] = useState("");
@@ -81,9 +88,24 @@ export default function CambiarClave({ correo }: { correo: string }) {
   return (
     <section className="rounded-xl border border-black/5 bg-white p-5">
       <h2 className="text-sm font-bold">Cambiar contraseña</h2>
-      <p className="mt-1 text-xs text-neutral-500">
-        Entras con <strong>{correo}</strong>. Si cambias la contraseña, la próxima
-        vez entras con la nueva; las sesiones que tengas abiertas en otros
+
+      {/* Las dos sirven para entrar, y conviene que las tenga a la vista: el
+          usuario es fácil de olvidar porque casi nunca se escribe. */}
+      <dl className="mt-3 space-y-1 rounded-lg bg-neutral-50 px-3 py-2 text-xs">
+        <div className="flex gap-2">
+          <dt className="w-20 shrink-0 text-neutral-500">Tu correo</dt>
+          <dd className="min-w-0 truncate font-medium">{correo}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="w-20 shrink-0 text-neutral-500">Tu usuario</dt>
+          <dd className="min-w-0 truncate font-medium">
+            {usuario ?? "—"}
+          </dd>
+        </div>
+      </dl>
+      <p className="mt-2 text-xs text-neutral-500">
+        Puedes entrar con cualquiera de los dos. Si cambias la contraseña, la
+        próxima vez entras con la nueva; las sesiones abiertas en otros
         dispositivos siguen abiertas.
       </p>
 

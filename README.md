@@ -57,7 +57,7 @@ que relacione cada dominio con su tienda.
 - Punto de venta (POS) con lector de código de barras.
 - Entradas de inventario, informes de ventas y cierre de caja.
 - Gestión de pedidos: detalle del cliente y cambio de estado (pendiente → entregado / cancelado).
-- **Configuración**, en tres pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y domicilio, con vista previa en vivo), *Datos del negocio* (razón social, cédula o NIT con su dígito de verificación calculado, responsable de IVA, ciudad, correo de facturas y quién atiende) y *Mi cuenta* (cambiar la contraseña, pidiendo la actual).
+- **Configuración**, en tres pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y domicilio, con vista previa en vivo), *Datos del negocio* (razón social, cédula o NIT con su dígito de verificación calculado, responsable de IVA, ciudad, correo de facturas y quién atiende) y *Mi cuenta* (sus dos formas de entrar a la vista, y cambiar la contraseña pidiendo la actual).
 
 ## La marca de cada tienda
 
@@ -118,8 +118,9 @@ No hay registro abierto: nadie entra sin permiso.
    puede cambiar después**, así que el formulario muestra el enlace resultante
    mientras se escribe.
 2. Entregar el código al tendero, o el enlace `/registro?codigo=…`.
-3. Él elige con qué entrar —**su correo o un usuario**— y pone la contraseña que
-   quiera. La plataforma nunca conoce esa contraseña.
+3. Él se registra con **su correo, un nombre de usuario y la contraseña que
+   quiera**. Después entra con cualquiera de los dos. La plataforma nunca conoce
+   esa contraseña.
 
 El código lo valida la base de datos al crear la cuenta: si no sirve, el alta se
 aborta entera y no queda ningún usuario a medias. Cada código sirve una sola vez
@@ -139,7 +140,7 @@ blanco.
 | Forma | Qué necesita | Dónde aterriza |
 | --- | --- | --- |
 | Correo y contraseña | el código de invitación, escrito en `/registro` | el acceso, a escribir sus credenciales |
-| Usuario y contraseña | el código, eligiendo «un usuario» en vez de correo | su panel, de una vez: no hay correo que confirmar |
+| Usuario y contraseña | el mismo alta: se piden correo **y** usuario, y sirven los dos | igual que con el correo |
 | Google, Facebook o Apple | nada, si reservaste su correo al invitarlo; si no, escribe el código después de entrar | su panel |
 | Recuperar contraseña | `/recuperar` le manda un enlace a su correo | la pantalla de la contraseña nueva |
 
@@ -154,32 +155,31 @@ Los tres destinos son distintos a propósito:
   comprobar Google, Facebook o Apple, y volver a pedir contraseña no tendría
   sentido cuando puede que ni tenga una.
 
-### Entrar con un usuario en vez de un correo
+### El correo y el usuario, los dos
 
-Para el tendero que no tiene o no recuerda un correo. Elige «un usuario» al
-registrarse, escribe algo como `autola50`, y con eso entra.
+Al registrarse se piden las dos cosas, y después sirven las dos para entrar. No
+es una elección: es tener dos llaves de la misma puerta.
 
-Supabase solo autentica con correos, así que el usuario se convierte en una
-dirección interna, `usuario@tusupermarket.com`, en
-[`toLoginEmail`](src/lib/admin-user.ts). El campo del acceso acepta las dos cosas:
-si lleva arroba se usa tal cual, y si no se le pone el dominio.
+- El **correo** es el de la cuenta de Supabase, que solo autentica con correos.
+  Con él funcionan la confirmación y la recuperación de contraseña.
+- El **usuario** vive en `stores.username`, único y en minúsculas. El acceso lo
+  traduce a su correo con `correo_de_usuario` justo antes de autenticar, porque
+  esa traducción tiene que poder hacerse **sin sesión**.
 
-Esa dirección no es un buzón, y ahí estaba el problema: con la confirmación de
-correo activada la cuenta habría nacido sin confirmar, el correo de confirmación
-se habría perdido en el vacío y **el tendero no habría podido entrar nunca**. Así
-que un disparador da por confirmadas las direcciones del dominio interno. No se
-salta ninguna comprobación: confirmar un correo sirve para demostrar que la
-dirección es de quien dice, y aquí no es de nadie — es un nombre de usuario
-disfrazado. Quien se registra con un correo de verdad sigue teniendo que
-confirmarlo, y en los dos casos hace falta un código de invitación válido.
+Se guarda en la misma operación que crea la tienda: si el usuario ya está tomado,
+el alta se aborta entera y no queda una cuenta a medias.
 
-**Lo que se pierde:** sin correo no hay recuperación de contraseña. El enlace
-iría a una dirección que no existe. Si la olvida, solo la plataforma puede
-ayudarle. El formulario se lo advierte antes de que elija, no después.
+El acceso y la recuperación aceptan cualquiera de los dos: si el texto lleva
+arroba se usa tal cual, y si no, se traduce.
 
-El dominio interno está escrito en `admin-user.ts` y en el disparador
-`confirmar_usuario_interno`. Si alguna vez cambia, hay que cambiarlo en los dos
-sitios.
+**Lo que eso expone, dicho sin adornos.** `correo_de_usuario` es pública, porque
+se llama antes de tener sesión. Quien acierte el usuario exacto de una tienda
+averigua su correo. Está lo más estrecha posible —coincidencia exacta, sin
+comodines, sin listados, nulo si no coincide— y el formulario da el mismo mensaje
+cuando el usuario no existe que cuando la contraseña está mal, para no delatar qué
+cuentas hay. La alternativa era guardar la clave maestra del proyecto en la
+aplicación para resolver la traducción en el servidor, y eso salta todas las
+políticas de todas las tiendas: mucho peor.
 
 Los dos primeros llegan por el mismo `?code=`, así que cuál fue lo dice el propio
 usuario: `app_metadata.provider` vale `email` en las cuentas de correo y el nombre

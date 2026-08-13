@@ -42,6 +42,8 @@ export type StoreInfo = {
   /** Quién atiende, y su celular. Distinto del teléfono público de la tienda. */
   ownerName: string | null;
   ownerPhone: string | null;
+  /** Nombre de usuario del dueño: la otra forma de entrar, además del correo. */
+  username: string | null;
   /**
    * Marca de la última edición, para versionar el icono.
    *

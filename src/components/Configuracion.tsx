@@ -60,7 +60,7 @@ export default function Configuracion({
               Con qué entras a tu panel.
             </p>
           </div>
-          <CambiarClave correo={correo} />
+          <CambiarClave correo={correo} usuario={store.username} />
         </div>
       )}
     </div>

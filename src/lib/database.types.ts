@@ -369,6 +369,7 @@ export type Database = {
           phone: string | null
           slug: string
           tagline: string | null
+          username: string | null
           updated_at: string
         }
         Insert: {
@@ -393,6 +394,7 @@ export type Database = {
           phone?: string | null
           slug: string
           tagline?: string | null
+          username?: string | null
           updated_at?: string
         }
         Update: {
@@ -417,6 +419,7 @@ export type Database = {
           phone?: string | null
           slug?: string
           tagline?: string | null
+          username?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -440,6 +443,7 @@ export type Database = {
       }
       cash_closing: { Args: { p_date?: string }; Returns: Json }
       canjear_invitacion: { Args: { p_code: string }; Returns: Json }
+      correo_de_usuario: { Args: { p_usuario: string }; Returns: string }
       es_sesion_demo: { Args: Record<string, never>; Returns: boolean }
       reset_demo: { Args: Record<string, never>; Returns: Json }
       generar_codigo_invitacion: { Args: Record<string, never>; Returns: string }

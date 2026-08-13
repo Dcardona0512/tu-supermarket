@@ -4,7 +4,6 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { toLoginEmail } from "@/lib/admin-user";
 import AccesoProveedores from "@/components/AccesoProveedores";
 
 export default function AdminLoginPage() {
@@ -30,20 +29,42 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /** El mismo mensaje para todo lo que falle: si no, el formulario diría cuáles
+   *  usuarios y correos existen. */
+  const NO_COINCIDE =
+    "Los datos no coinciden. Revisa tu correo o usuario y tu contraseña.";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     const supabase = createClient();
+    const entrada = user.trim().toLowerCase();
+
+    // Supabase autentica por correo. Si escribió su nombre de usuario, hay que
+    // traducirlo antes: la tienda guarda cuál es el correo de ese usuario.
+    let correo = entrada;
+    if (!entrada.includes("@")) {
+      const { data } = await supabase.rpc("correo_de_usuario", {
+        p_usuario: entrada,
+      });
+      if (!data) {
+        setLoading(false);
+        setError(NO_COINCIDE);
+        return;
+      }
+      correo = data;
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: toLoginEmail(user),
+      email: correo,
       password,
     });
 
     if (signInError) {
       setLoading(false);
-      setError("Los datos no coinciden. Revisa tu correo o usuario y tu contraseña.");
+      setError(NO_COINCIDE);
       return;
     }
 

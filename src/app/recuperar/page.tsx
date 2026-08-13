@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { toLoginEmail } from "@/lib/admin-user";
 
 /**
  * Pedir el correo para volver a poner la contraseña.
+ *
+ * Acepta también el nombre de usuario, porque es lo que el tendero recuerda: se
+ * traduce a su correo igual que en el acceso, y el enlace se manda ahí.
  *
  * Se responde igual haya cuenta o no: decir "ese correo no existe" le confirma a
  * cualquiera qué correos tienen tienda en la plataforma.
@@ -23,8 +25,25 @@ export default function RecuperarPage() {
     setEnviando(true);
 
     const supabase = createClient();
+    const entrada = correo.trim().toLowerCase();
+
+    // Si escribió su usuario en vez de su correo, se traduce. Si no existe, no se
+    // dice: se sigue como si se hubiera enviado, para no delatar qué cuentas hay.
+    let destino = entrada;
+    if (!entrada.includes("@")) {
+      const { data } = await supabase.rpc("correo_de_usuario", {
+        p_usuario: entrada,
+      });
+      if (!data) {
+        setEnviando(false);
+        setEnviado(true);
+        return;
+      }
+      destino = data;
+    }
+
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      toLoginEmail(correo),
+      destino,
       {
         // La ruta canjea el enlace, abre la sesión y lo deja en la pantalla
         // donde escribe la contraseña nueva.
@@ -52,8 +71,8 @@ export default function RecuperarPage() {
       <Marco>
         <h1 className="text-lg font-bold">Revisa tu correo</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Si <strong>{correo}</strong> tiene una cuenta, le llegó un enlace para
-          poner una contraseña nueva. El enlace sirve una sola vez.
+          Si <strong>{correo}</strong> tiene una cuenta, le llegó un enlace a su
+          correo para poner una contraseña nueva. El enlace sirve una sola vez.
         </p>
         <p className="mt-2 text-xs text-neutral-500">
           Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
@@ -78,7 +97,7 @@ export default function RecuperarPage() {
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
         <div>
           <label className="mb-1 block text-xs font-medium text-neutral-600">
-            Tu correo
+            Tu correo o usuario
           </label>
           <input
             type="text"
