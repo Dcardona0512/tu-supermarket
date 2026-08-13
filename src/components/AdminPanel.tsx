@@ -23,8 +23,6 @@ type Invite = {
   code: string;
   storeName: string;
   slug: string;
-  /** Correo reservado, si se puso al invitar. */
-  correo: string | null;
   usada: boolean;
   vencida: boolean;
   expira: string;
@@ -45,8 +43,6 @@ export default function AdminPanel({
 }) {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
-  const [enlace, setEnlace] = useState("");
-  const [correo, setCorreo] = useState("");
   const [creando, setCreando] = useState(false);
   const [nuevoCodigo, setNuevoCodigo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +54,7 @@ export default function AdminPanel({
 
   const activas = stores.filter((s) => s.isPublished).length;
   const pendientes = invites.filter((i) => !i.usada && !i.vencida).length;
-  const previo = toSlug(enlace || nombre);
+  const previo = toSlug(nombre);
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -66,7 +62,7 @@ export default function AdminPanel({
     setError(null);
     setNuevoCodigo(null);
 
-    const res = await createInvite(nombre, enlace, correo);
+    const res = await createInvite(nombre);
     setCreando(false);
 
     if (!res.ok) {
@@ -75,8 +71,6 @@ export default function AdminPanel({
     }
     setNuevoCodigo(res.code ?? null);
     setNombre("");
-    setEnlace("");
-    setCorreo("");
     router.refresh();
   }
 
@@ -143,9 +137,8 @@ export default function AdminPanel({
         <section className="rounded-xl border border-black/5 bg-white p-5">
           <h2 className="text-sm font-bold">Invitar una tienda</h2>
           <p className="mt-1 text-xs text-neutral-500">
-            Reservas su nombre y su enlace, y le entregas el código. Ella se
-            registra con su correo y elige su propia contraseña: tú nunca la
-            conoces.
+            Le reservas el nombre y le entregas el código. Ella se registra con el
+            correo que quiera y elige su propia contraseña: tú nunca la conoces.
           </p>
 
           <form onSubmit={crear} className="mt-3 flex flex-wrap items-end gap-2">
@@ -161,46 +154,14 @@ export default function AdminPanel({
                 className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               />
             </div>
-            <div className="min-w-40 flex-1">
-              <label className="mb-1 block text-xs font-medium text-neutral-600">
-                Nombre corto (opcional)
-              </label>
-              <input
-                value={enlace}
-                onChange={(e) => setEnlace(e.target.value)}
-                placeholder="se genera del nombre"
-                className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-              />
-            </div>
-            <div className="min-w-48 flex-1">
-              <label className="mb-1 block text-xs font-medium text-neutral-600">
-                Su correo (opcional)
-              </label>
-              <input
-                type="email"
-                value={correo}
-                onChange={(e) => setCorreo(e.target.value)}
-                placeholder="para que entre con Google"
-                autoCapitalize="none"
-                spellCheck={false}
-                className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-              />
-            </div>
-            {/* Reservar el correo es lo que le permite entrar con Google,
-                Facebook o Apple sin escribir el código: al no poder mandarlo en
-                ese registro, la tienda se reconoce por el correo. Si se deja
-                vacío, tendrá que escribir el código después de entrar. */}
-            <p className="w-full text-xs text-neutral-500">
-              Si escribes su correo, al entrar con Google, Facebook o Apple su
-              tienda se abre sola. Si no, le toca escribir el código.
-            </p>
-            {/* Se muestra el enlace que va a quedar: es la única forma de no
-                equivocarse, porque el nombre corto no se puede cambiar después. */}
+            {/* Se muestra el enlace que va a quedar. El nombre corto sale del
+                nombre y **no se puede cambiar después**, así que verlo antes de
+                crear el código es la única forma de no equivocarse. */}
             <p className="w-full text-xs text-neutral-500">
               Su tienda quedará en{" "}
               <code className="rounded bg-neutral-100 px-1.5 py-0.5">
                 {origen.replace(/^https?:\/\//, "") || "…"}/
-                <strong>{previo || "nombre-corto"}</strong>
+                <strong>{previo || "nombre-de-la-tienda"}</strong>
               </code>
             </p>
             <button
@@ -299,7 +260,6 @@ export default function AdminPanel({
                     <p className="truncate text-sm">{i.storeName}</p>
                     <p className="truncate text-xs text-neutral-500">
                       /{i.slug} · vence {i.expira}
-                      {i.correo && ` · ${i.correo}`}
                     </p>
                   </div>
                   <span

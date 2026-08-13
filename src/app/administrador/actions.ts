@@ -33,19 +33,17 @@ async function requirePlatformAdmin() {
 
 
 /**
- * Crea un código de invitación con el nombre y el enlace ya reservados.
+ * Crea un código de invitación con el nombre de la tienda ya reservado.
  *
- * El tendero se registra él mismo con ese código y elige su contraseña: así
- * nadie entra sin permiso y tú no llegas a conocer su clave.
+ * El tendero se registra él mismo con ese código, con el correo que quiera y la
+ * contraseña que elija: así nadie entra sin permiso y tú no llegas a conocer su
+ * clave.
  *
- * El correo es opcional y sirve para un caso concreto: si entra con Google,
- * Facebook o Apple no hay forma de mandar el código en el registro, así que la
- * base reconoce la invitación por el correo y le abre la tienda sola.
+ * Solo se pide el nombre. El nombre corto sale de él, y el correo no se reserva:
+ * es el tendero quien decide con cuál entra.
  */
 export async function createInvite(
   storeName: string,
-  slug: string,
-  email = "",
   diasValidez = 30
 ): Promise<Result & { code?: string }> {
   try {
@@ -54,14 +52,12 @@ export async function createInvite(
     const nombre = storeName.trim();
     if (!nombre) return { ok: false, error: "El nombre es obligatorio" };
 
-    const enlace = toSlug(slug || storeName);
+    const enlace = toSlug(nombre);
     if (enlace.length < 3) {
-      return { ok: false, error: "El enlace debe tener al menos 3 caracteres" };
-    }
-
-    const correo = email.trim().toLowerCase();
-    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-      return { ok: false, error: "Ese correo no parece válido" };
+      return {
+        ok: false,
+        error: "El nombre debe dar un enlace de al menos 3 caracteres",
+      };
     }
 
     const { data: codigo, error: errCodigo } = await supabase.rpc(
@@ -77,7 +73,6 @@ export async function createInvite(
       store_name: nombre,
       slug: enlace,
       created_by: user.id,
-      email: correo || null,
       expires_at: expira.toISOString(),
     });
 
@@ -90,18 +85,10 @@ export async function createInvite(
           error: `El enlace "${enlace}" ya está tomado o es un nombre reservado`,
         };
       }
-      // Solo puede haber una invitación abierta por correo: si no, la segunda
-      // quedaría muerta sin que nadie se diera cuenta.
-      if (error.message.includes("email")) {
-        return {
-          ok: false,
-          error: `Ya hay una invitación sin usar para ${correo}`,
-        };
-      }
       return { ok: false, error: error.message };
     }
 
-    revalidatePath("/plataforma");
+    revalidatePath("/administrador");
     return { ok: true, code: codigo as string };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
@@ -123,7 +110,7 @@ export async function setStorePublished(
 
     if (error) return { ok: false, error: error.message };
 
-    revalidatePath("/plataforma");
+    revalidatePath("/administrador");
     revalidatePath("/");
     return { ok: true };
   } catch (e) {
@@ -144,7 +131,7 @@ export async function deleteInvite(inviteId: string): Promise<Result> {
 
     if (error) return { ok: false, error: error.message };
 
-    revalidatePath("/plataforma");
+    revalidatePath("/administrador");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: (e as Error).message };

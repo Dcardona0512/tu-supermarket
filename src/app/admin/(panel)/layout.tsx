@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import AdminSidebar from "@/components/AdminSidebar";
 import NewOrderAlert from "@/components/NewOrderAlert";
 import { getSessionStore } from "@/lib/store";
@@ -6,6 +7,34 @@ import { toDisplayUser } from "@/lib/admin-user";
 import { darken, readableText, inkOnWhite } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * La pestaña del panel dice «Panel», y lleva el icono de la tienda.
+ *
+ * Lo primero es para distinguirla de un tirón cuando el tendero tiene abiertas
+ * las dos: su escaparate lleva el nombre del negocio y esta lleva «Panel».
+ *
+ * Y el icono es el mismo que genera su tienda, con la misma versión en la URL, de
+ * modo que si cambia su color el favicon del panel cambia con él. Antes esta
+ * pestaña mostraba el icono de la plataforma, así que personalizar cambiaba el de
+ * la tienda pero no el del panel.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { store } = await getSessionStore();
+  if (!store) return { title: "Panel" };
+
+  const icono = `/${store.slug}/icono?v=${store.version}`;
+
+  return {
+    title: "Panel",
+    icons: {
+      icon: [{ url: icono, type: "image/png", sizes: "64x64" }],
+      apple: [
+        { url: `${icono}&size=180`, type: "image/png", sizes: "180x180" },
+      ],
+    },
+  };
+}
 
 export default async function PanelLayout({
   children,

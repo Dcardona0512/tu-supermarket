@@ -30,7 +30,7 @@ export default async function AdministradorPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("store_invites")
-      .select("id, code, store_name, slug, email, expires_at, used_at, created_at")
+      .select("id, code, store_name, slug, expires_at, used_at, created_at")
       .order("created_at", { ascending: false }),
   ]);
 
@@ -48,7 +48,6 @@ export default async function AdministradorPage() {
         code: i.code,
         storeName: i.store_name,
         slug: i.slug,
-        correo: i.email,
         usada: i.used_at != null,
         vencida: new Date(i.expires_at) < new Date(),
         expira: formatDate(i.expires_at),
