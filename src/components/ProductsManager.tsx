@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatCOP } from "@/lib/format";
 import CategoryManager from "@/components/CategoryManager";
 import ScanButton from "@/components/ScanButton";
+import { useLectorDeCodigos } from "@/lib/lector";
 import { compressImage, formatBytes } from "@/lib/image";
 import { EXPIRY_STYLES, expiryStatus } from "@/lib/expiry";
 import { categoryOptions, categoryPath } from "@/lib/categories";
@@ -308,6 +309,18 @@ function ProductForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  /**
+   * La pistola llena el código de barras esté donde esté el foco.
+   *
+   * Aquí sí se captura dentro de los campos —`enCampos`— porque en un formulario
+   * el tendero casi siempre está escribiendo en alguno cuando dispara: acaba de
+   * teclear el nombre y apunta a la caja. Sin esto el código le caería dentro del
+   * nombre, que es justo lo que pasaba.
+   */
+  useLectorDeCodigos((codigo) => set("barcode", codigo), true, {
+    enCampos: true,
+  });
+
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const original = e.target.files?.[0];
     if (!original) return;
@@ -481,8 +494,8 @@ function ProductForm({
               />
             </div>
             <p className="mt-1 text-xs text-neutral-400">
-              Usa la cámara o, con el campo enfocado, dispara la pistola
-              lectora.
+              Dispara la pistola lectora y el código entra solo, sin tener que
+              hacer clic aquí. También puedes usar la cámara o escribirlo.
             </p>
           </div>
 
