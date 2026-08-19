@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +14,7 @@ import { categoryOptions, categoryPath } from "@/lib/categories";
 import {
   saveProduct,
   deleteProduct,
+  deleteProducts,
   createCategory,
   type ProductInput,
 } from "@/app/admin/(panel)/productos/actions";
@@ -84,6 +85,67 @@ export default function ProductsManager({
     else router.refresh();
   }
 
+  /**
+   * Se guardan los `id` y no los productos: la lista se vuelve a traer del
+   * servidor tras cada borrado, y quedarse con objetos viejos dejaría marcadas
+   * filas que ya no existen.
+   */
+  const [seleccion, setSeleccion] = useState<Set<string>>(new Set());
+  const [borrando, setBorrando] = useState(false);
+
+  // Se cruza con lo que hay ahora, así lo que desapareció deja de contar solo.
+  const marcados = products.filter((p) => seleccion.has(p.id));
+  const todosMarcados = products.length > 0 && marcados.length === products.length;
+
+  // La casilla de la cabecera tiene tres estados y el tercero —algunos, no
+  // todos— no se puede poner por atributo, solo por propiedad.
+  const casillaCabecera = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (casillaCabecera.current) {
+      casillaCabecera.current.indeterminate =
+        marcados.length > 0 && !todosMarcados;
+    }
+  }, [marcados.length, todosMarcados]);
+
+  function alternar(id: string) {
+    setSeleccion((antes) => {
+      const ahora = new Set(antes);
+      if (ahora.has(id)) ahora.delete(id);
+      else ahora.add(id);
+      return ahora;
+    });
+  }
+
+  function alternarTodos() {
+    setSeleccion(todosMarcados ? new Set() : new Set(products.map((p) => p.id)));
+  }
+
+  async function handleDeleteSelected() {
+    if (marcados.length === 0) return;
+
+    // Se nombran los primeros: «¿Eliminar 12 productos?» a secas no deja
+    // comprobar que son los que se querían.
+    const muestra = marcados.slice(0, 5).map((p) => `• ${p.name}`).join("\n");
+    const resto =
+      marcados.length > 5 ? `\n• y ${marcados.length - 5} más` : "";
+    const aviso =
+      marcados.length === 1
+        ? `¿Eliminar 1 producto?\n\n${muestra}`
+        : `¿Eliminar ${marcados.length} productos?\n\n${muestra}${resto}`;
+    if (!confirm(`${aviso}\n\nEsto no se puede deshacer.`)) return;
+
+    setBorrando(true);
+    const res = await deleteProducts(marcados.map((p) => p.id));
+    setBorrando(false);
+
+    if (!res.ok) {
+      alert(res.error);
+      return;
+    }
+    setSeleccion(new Set());
+    router.refresh();
+  }
+
   function categoryName(id: string | null) {
     return categoryPath(categories, id) ?? "—";
   }
@@ -108,10 +170,48 @@ export default function ProductsManager({
         </div>
       </div>
 
+      {marcados.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 px-4 py-3">
+          <span className="text-sm font-medium">
+            {marcados.length === 1
+              ? "1 producto seleccionado"
+              : `${marcados.length} productos seleccionados`}
+          </span>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => setSeleccion(new Set())}
+              className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+            >
+              Quitar selección
+            </button>
+            <button
+              onClick={handleDeleteSelected}
+              disabled={borrando}
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:bg-neutral-300"
+            >
+              {borrando
+                ? "Eliminando..."
+                : `Eliminar ${marcados.length === 1 ? "" : marcados.length + " "}seleccionado${marcados.length === 1 ? "" : "s"}`}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-xl border border-black/5 bg-white">
         <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-black/5 text-left text-xs uppercase text-neutral-400">
             <tr>
+              <th className="w-10 px-4 py-3">
+                <input
+                  ref={casillaCabecera}
+                  type="checkbox"
+                  checked={todosMarcados}
+                  onChange={alternarTodos}
+                  disabled={products.length === 0}
+                  aria-label="Seleccionar todos los productos"
+                  className="h-4 w-4 cursor-pointer accent-[var(--brand)]"
+                />
+              </th>
               <th className="px-4 py-3 font-medium">Producto</th>
               <th className="px-4 py-3 font-medium">Categoría</th>
               <th className="px-4 py-3 font-medium">Costo</th>
@@ -126,7 +226,7 @@ export default function ProductsManager({
           <tbody className="divide-y divide-black/5">
             {products.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-neutral-400">
+                <td colSpan={10} className="px-4 py-10 text-center text-neutral-400">
                   No hay productos. Crea el primero.
                 </td>
               </tr>
@@ -141,7 +241,21 @@ export default function ProductsManager({
                 ? Math.round((unitProfit / sellPrice) * 100)
                 : 0;
               return (
-                <tr key={p.id} className="hover:bg-neutral-50">
+                <tr
+                  key={p.id}
+                  className={
+                    seleccion.has(p.id) ? "bg-brand/5" : "hover:bg-neutral-50"
+                  }
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={seleccion.has(p.id)}
+                      onChange={() => alternar(p.id)}
+                      aria-label={`Seleccionar ${p.name}`}
+                      className="h-4 w-4 cursor-pointer accent-[var(--brand)]"
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-black/5 bg-white">

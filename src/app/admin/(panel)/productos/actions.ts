@@ -145,6 +145,38 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
 }
 
+/**
+ * Borra varios productos de una vez.
+ *
+ * Va en una sola consulta y no repitiendo `deleteProduct`: con veinte productos
+ * serían veinte viajes a la base, y si uno fallara a la mitad el tendero se
+ * quedaría sin saber cuáles se fueron. Una sola sentencia es atómica — o se van
+ * todos o no se va ninguno.
+ *
+ * El aislamiento entre tiendas no depende de esta función: la política de
+ * `products` solo deja tocar las filas de la tienda de quien pide, así que un
+ * `id` de otra tienda colado en la lista no borra nada.
+ */
+export async function deleteProducts(ids: string[]): Promise<ActionResult> {
+  try {
+    const supabase = await requireAdmin();
+
+    const limpios = [...new Set(ids.filter((id) => typeof id === "string" && id))];
+    if (limpios.length === 0) {
+      return { ok: false, error: "No hay productos seleccionados" };
+    }
+
+    const { error } = await supabase.from("products").delete().in("id", limpios);
+    if (error) return { ok: false, error: error.message };
+
+    revalidatePath("/admin/productos");
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 function categoryError(message: string): string {
   // 23505 = nombre duplicado dentro del mismo nivel
   if (message.includes("categories_name_child_idx")) {
