@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
         hostname: supabaseHost,
         pathname: "/storage/v1/object/public/**",
       },
+      // TEMPORAL — el Supabase antiguo de La 53. Su inventario se migró con las
+      // fotos todavía alojadas allí, y sin esta entrada `next/image` se niega a
+      // servirlas y la tienda sale sin ninguna imagen. Se quita junto con
+      // `/admin/migrar-fotos` en cuanto los archivos estén aquí.
+      {
+        protocol: "https",
+        hostname: "svoeeqodivfkmmwyqlxh.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };
