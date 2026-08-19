@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate } from "@/lib/format";
 import ScanButton from "@/components/ScanButton";
+import { useLectorDeCodigos } from "@/lib/lector";
 import type { Product, StockEntry } from "@/lib/database.types";
 
 type Line = {
@@ -84,6 +85,10 @@ export default function InventoryEntry({
       ];
     });
   }
+
+  // Igual que en el punto de venta: el disparo vale aunque el foco no este en el
+  // campo, que es lo que pasa en cuanto se toca cualquier boton de la pantalla.
+  useLectorDeCodigos((codigo) => handleScannedCode(codigo));
 
   /** Añade la línea del producto cuyo código coincida exactamente. */
   function handleScannedCode(value: string) {
@@ -219,7 +224,7 @@ export default function InventoryEntry({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               onKeyDown={onScan}
-              placeholder="Escribe el nombre o dispara la pistola lectora"
+              placeholder="Escribe el nombre, o dispara la pistola en cualquier parte"
               className="w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <ScanButton

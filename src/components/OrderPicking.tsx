@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ScanButton from "@/components/ScanButton";
+import { useLectorDeCodigos } from "@/lib/lector";
 import type { OrderItem } from "@/lib/database.types";
 
 /**
@@ -40,6 +41,10 @@ export default function OrderPicking({
       return { ...prev, [itemId]: next };
     });
   }
+
+  // Alistando un pedido se van tocando casillas, asi que el foco se pierde
+  // constantemente; el disparo tiene que valer igual.
+  useLectorDeCodigos((codigo) => handleScannedCode(codigo));
 
   /** Marca el ítem del pedido cuyo producto tiene ese código. */
   function handleScannedCode(value: string) {
@@ -90,7 +95,7 @@ export default function OrderPicking({
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onKeyDown={onScan}
-          placeholder="Dispara la pistola sobre cada producto..."
+          placeholder="Dispara la pistola sobre cada producto, sin tocar nada"
           className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
         <ScanButton

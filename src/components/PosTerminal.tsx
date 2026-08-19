@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatCOP } from "@/lib/format";
 import { sonidoCaja } from "@/lib/sound";
 import ScanButton from "@/components/ScanButton";
+import { useLectorDeCodigos } from "@/lib/lector";
 import { buildTree, categoryWithChildren } from "@/lib/categories";
 import type { Category, Product } from "@/lib/database.types";
 
@@ -154,6 +155,10 @@ export default function PosTerminal({
     setError(null);
   }
 
+  // La pistola tambien funciona con el foco fuera del buscador: en el mostrador
+  // se toca un boton o una tarjeta y el siguiente disparo se perderia.
+  useLectorDeCodigos((codigo) => handleScannedCode(codigo));
+
   /** Añade al ticket el producto cuyo código coincida exactamente. */
   function handleScannedCode(code: string) {
     const scanned = products.find((p) => p.barcode && p.barcode === code);
@@ -275,7 +280,7 @@ export default function PosTerminal({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={onSearchKey}
-              placeholder="Busca por nombre o dispara la pistola lectora"
+              placeholder="Busca por nombre, o dispara la pistola en cualquier parte"
               className="w-full rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <ScanButton

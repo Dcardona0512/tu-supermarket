@@ -54,7 +54,7 @@ que relacione cada dominio con su tienda.
 - Acceso con usuario y contraseña.
 - Resumen: productos, pedidos pendientes, ventas y alertas de stock bajo y de productos por vencer.
 - Gestión de productos: crear/editar/eliminar, subida de imágenes, categorías y subcategorías, marca, código de barras, unidad, oferta/descuento, stock, vencimiento y visibilidad.
-- Punto de venta (POS) con lector de código de barras.
+- Punto de venta (POS) con pistola lectora y con la cámara del celular.
 - Entradas de inventario, informes de ventas y cierre de caja.
 - Gestión de pedidos: detalle del cliente y cambio de estado (pendiente → entregado / cancelado).
 - **Configuración**, en tres pestañas: *Mi tienda* (nombre, frase, logo, color, teléfono, dirección y domicilio, con vista previa en vivo), *Datos del negocio* (razón social, cédula o NIT con su dígito de verificación calculado, responsable de IVA, ciudad, correo de facturas y quién atiende) y *Mi cuenta* (correo, usuario y desde cuándo es cliente, más cambiar la contraseña pidiendo la actual).
@@ -361,6 +361,35 @@ dos definiciones dejaron de coincidir: las políticas dejaban escribir y el
 disparador abortaba el insert.
 
 Ahora pregunta a `my_store_id()` como todo lo demás.
+
+## La pistola lectora
+
+Las pistolas USB se presentan al sistema como un teclado: "teclean" el código y
+casi siempre mandan Enter. Por eso cada pantalla que escanea tiene un campo
+enfocado que lo recoge -- punto de venta, entradas de inventario y alistar un
+pedido.
+
+Eso solo no basta en un mostrador. En cuanto el cajero toca un botón, una tarjeta
+de producto o el campo del efectivo, el foco se va del campo y **el siguiente
+disparo se pierde**. Así que además hay un enganche que escucha en toda la
+pantalla, en [`src/lib/lector.ts`](src/lib/lector.ts).
+
+Distingue un disparo de alguien escribiendo por dos cosas a la vez: los
+caracteres llegan en menos de 60 ms unos de otros, y el resultado son solo
+dígitos, al menos seis. Las dos condiciones juntas hacen imposible confundirlo
+con el uso normal del teclado.
+
+Termina de tres formas, porque cada marca se configura distinto: con Enter, con
+Tab, o sin sufijo -- en ese caso se cierra sola tras 120 ms de silencio.
+
+Cuando el foco sí está en un campo de texto, el enganche no se mete: manda el
+campo, que ya tiene su manejador. Queda un caso sin cubrir, y conviene saberlo:
+si el cajero tiene el foco en **otro** campo (el del efectivo, por ejemplo) y
+dispara, los dígitos entran ahí. Es el mismo comportamiento que tendría cualquier
+teclado.
+
+La cámara del celular sigue estando, con el botón *Escanear*, para quien no tenga
+pistola.
 
 ## Catálogo de ejemplo
 
