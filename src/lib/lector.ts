@@ -6,33 +6,44 @@ import { useEffect, useRef } from "react";
  * Escucha la pistola lectora en toda la pantalla, sin depender del foco.
  *
  * Las pistolas USB se presentan al sistema como un teclado: "teclean" el código
- * carácter a carácter y casi siempre terminan con Enter. Por eso cada pantalla
- * que escanea ya tenía un campo enfocado que lo recogía.
+ * carácter a carácter y casi siempre terminan con Enter. Sin esto, en cuanto el
+ * cajero toca un botón o una tarjeta de producto el foco se va y el siguiente
+ * disparo se pierde.
  *
- * El problema es el mostrador: en cuanto el cajero toca un botón, una tarjeta de
- * producto o el campo del efectivo, el foco se va y **el siguiente disparo se
- * pierde**. Este enganche lo recoge igual.
+ * **Cómo distingue un disparo de alguien escribiendo.** La primera versión
+ * medía el hueco entre cada dos teclas y cortaba la lectura en cuanto uno
+ * superaba el límite. Eso resultó ser un error grave: cuando la pistola tropieza
+ * a mitad de un código —y tropieza—, el principio se descartaba y la cola se
+ * entregaba como si fuera el código entero. En la tienda eso se vio como
+ * productos guardados con códigos falsos, de 6 y 10 dígitos.
  *
- * Cómo distingue un disparo de alguien escribiendo:
+ * Ahora se juzga la ráfaga entera y no cada tecla:
  *
- *   - los caracteres llegan **muy seguidos**, en menos de `PAUSA_MAXIMA`
- *     milisegundos; una persona no teclea así de rápido de forma sostenida;
- *   - el resultado son **solo dígitos** y al menos `LARGO_MINIMO`, que es como
- *     son los códigos de barras de producto (EAN-13, UPC-A y compañía).
+ *   - se acumula todo lo que llegue y solo cierra el **silencio**, no un hueco
+ *     suelto, así que un tropiezo ya no parte el código;
+ *   - al cerrar se exige que la **media** por tecla sea de máquina, cosa que
+ *     tolera ese tropiezo pero sigue descartando a una persona tecleando;
+ *   - y se exige que el resultado tenga una **longitud de código de barras de
+ *     verdad**. Esto es lo que de veras cierra la puerta: un trozo de código no
+ *     mide 8, 12, 13 ni 14, así que no puede colarse por muy rápido que llegue.
  *
- * Y termina de tres formas, porque las pistolas se configuran distinto según la
- * marca: con Enter, con Tab, o sin sufijo ninguno — en ese último caso se cierra
- * sola cuando pasan `PAUSA_FINAL` milisegundos sin más teclas.
+ * Termina de tres formas, porque las pistolas se configuran distinto: con Enter,
+ * con Tab, o sin sufijo, cerrando sola tras el silencio.
  */
 
-/** Un disparo teclea cada carácter en pocos milisegundos. */
-const PAUSA_MAXIMA = 60;
+/** Media máxima por tecla para considerarlo una máquina y no una persona. */
+const PAUSA_MEDIA_MAXIMA = 60;
 
-/** Silencio tras el que se da por terminado un código sin sufijo. */
-const PAUSA_FINAL = 120;
+/** Silencio tras el que se da por terminada la lectura. */
+const PAUSA_FINAL = 250;
 
-/** Por debajo de esto no se considera un código de barras. */
-const LARGO_MINIMO = 6;
+/**
+ * Longitudes de un código de barras de producto: EAN-8, UPC-A, EAN-13 e ITF-14.
+ *
+ * Solo restringe lo que entra por la pistola. El campo de código sigue
+ * admitiendo a mano lo que el tendero quiera, por si usa numeración propia.
+ */
+const LARGOS_VALIDOS = new Set([8, 12, 13, 14]);
 
 type Campo = HTMLInputElement | HTMLTextAreaElement;
 
@@ -67,13 +78,9 @@ export function useLectorDeCodigos(
     /**
      * Capturar también con el foco dentro de un campo.
      *
-     * Hace falta en formularios, donde el cajero casi siempre está escribiendo
-     * en algún campo cuando dispara: sin esto, los dígitos del código acabarían
-     * dentro del nombre del producto. Los caracteres sí llegan al campo mientras
+     * Hace falta en formularios, donde el tendero casi siempre está escribiendo
+     * en algún campo cuando dispara. Los caracteres llegan al campo mientras
      * dura el disparo, y al reconocerlo se le devuelve su valor anterior.
-     *
-     * Fuera de un formulario conviene dejarlo apagado: si el cajero está
-     * escribiendo, manda lo que escribe.
      */
     enCampos?: boolean;
   } = {}
@@ -83,11 +90,10 @@ export function useLectorDeCodigos(
   // En referencias y no en el estado: cambian con cada tecla y no deben
   // repintar nada.
   const buffer = useRef("");
-  const ultima = useRef(0);
+  const inicio = useRef(0);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tocado = useRef<{ campo: Campo; previo: string } | null>(null);
 
-  // La función más reciente, para no volver a suscribirse en cada repintado.
   const alLeerRef = useRef(alLeer);
   useEffect(() => {
     alLeerRef.current = alLeer;
@@ -105,14 +111,25 @@ export function useLectorDeCodigos(
       }
     }
 
+    /** ¿La ráfaga acumulada puede ser un código leído por una máquina? */
+    function esDisparo(codigo: string, transcurrido: number): boolean {
+      if (!LARGOS_VALIDOS.has(codigo.length)) return false;
+      // Con una sola tecla no hay hueco que medir, y con una no se llega nunca
+      // a las longitudes válidas.
+      const media = transcurrido / (codigo.length - 1);
+      return media <= PAUSA_MEDIA_MAXIMA;
+    }
+
     function entregar() {
       const codigo = buffer.current;
       const campo = tocado.current;
+      const transcurrido = Date.now() - inicio.current;
       limpiar();
-      if (codigo.length < LARGO_MINIMO) return;
 
-      // El código alcanzó a escribirse dentro del campo que tenía el foco: se le
-      // devuelve lo que había antes del disparo.
+      if (!esDisparo(codigo, transcurrido)) return;
+
+      // El código alcanzó a escribirse dentro del campo enfocado: se le devuelve
+      // lo que había antes del disparo.
       if (campo && campo.campo.value !== campo.previo) {
         restaurar(campo.campo, campo.previo);
       }
@@ -123,12 +140,9 @@ export function useLectorDeCodigos(
       const dentroDeCampo = esCampo(e.target);
       if (dentroDeCampo && !enCampos) return;
 
-      const ahora = Date.now();
-      const seguido = ahora - ultima.current <= PAUSA_MAXIMA;
-      ultima.current = ahora;
-
       if (e.key === "Enter" || e.key === "Tab") {
-        if (buffer.current.length >= LARGO_MINIMO) {
+        const transcurrido = Date.now() - inicio.current;
+        if (esDisparo(buffer.current, transcurrido)) {
           // Se corta aquí para que no pulse el botón que tenga el foco ni envíe
           // el formulario.
           e.preventDefault();
@@ -146,19 +160,17 @@ export function useLectorDeCodigos(
         return;
       }
 
-      if (seguido) {
-        buffer.current += e.key;
-      } else {
-        // Empieza una secuencia nueva. Se anota el campo y lo que tenía escrito
-        // **antes** de que el navegador meta este carácter, por si resulta ser
-        // un disparo y hay que deshacerlo.
-        buffer.current = e.key;
+      if (buffer.current === "") {
+        inicio.current = Date.now();
+        // Se anota el campo y lo que tenía escrito **antes** de que el navegador
+        // meta este carácter, por si resulta ser un disparo y hay que deshacerlo.
         tocado.current = dentroDeCampo
           ? { campo: e.target as Campo, previo: (e.target as Campo).value }
           : null;
       }
+      buffer.current += e.key;
 
-      // Por si la pistola no manda sufijo: se cierra sola tras el silencio.
+      // Solo el silencio cierra la lectura. Un hueco suelto ya no la parte.
       if (temporizador.current) clearTimeout(temporizador.current);
       temporizador.current = setTimeout(entregar, PAUSA_FINAL);
     }

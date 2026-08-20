@@ -206,12 +206,20 @@ export default function PosTerminal({
       return;
     }
 
+    // Si lo escrito parece un código, no se cae al primer resultado de texto.
+    // Esa red de seguridad estaba pensada para cuando el cajero busca «coca» y
+    // pulsa Enter, pero con un código se vuelve peligrosa: la búsqueda casa por
+    // trozos, y en un catálogo real decenas de productos comparten los primeros
+    // dígitos. Una lectura a medias acababa cobrando otro producto sin avisar.
+    if (/^\d{7,}$/.test(code)) {
+      handleScannedCode(code);
+      setSearch("");
+      return;
+    }
+
     const first = filtered.find((p) => p.stock > 0);
     if (first) {
       addProduct(first);
-      setSearch("");
-    } else if (/^\d{6,}$/.test(code)) {
-      handleScannedCode(code);
       setSearch("");
     }
   }
